@@ -1,0 +1,9 @@
+services:
+  worker:
+    build: .
+    network_mode: host
+    tty: true
+    volumes:
+      - ./src:/pymec-client
+    working_dir: /worker
+    command: /bin/bash
