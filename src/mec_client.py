@@ -1,7 +1,7 @@
 import swagger_client
 from mec_io import MECIO, MECResStatus
 from mec_job import MECJob
-
+ 
 
 class MECClient(MECIO):
     def __init__(self, client: swagger_client.ApiClient):
@@ -38,9 +38,9 @@ class MECClient(MECIO):
 
         return (status, value)
 
-    def create_job(self, input_id: str, lambda_id: str) -> tuple[MECResStatus, MECJob | str]:
+    def create_job(self, input_data_id: str, lambda_id: str) -> tuple[MECResStatus, MECJob | str]:
         request = swagger_client.RequestJobCreate(
-            input_id=input_id, lambda_id=lambda_id
+            input_id=input_data_id, lambda_id=lambda_id
         )
 
         response: swagger_client.ResponseJobCreate = self._job_api.pleiades_job_create(
@@ -48,7 +48,7 @@ class MECClient(MECIO):
         )
 
         status = MECResStatus.OK if response.status == "ok" else MECResStatus.FAILED
-        value = MECJob(response.jid) if status == MECResStatus.OK else response.message
+        value = MECJob(response.jid, input_data_id, lambda_id) if status == MECResStatus.OK else response.message
 
         return (status, value)
 

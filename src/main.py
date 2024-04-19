@@ -1,4 +1,4 @@
-from pose_worker import PoseWorker
+
 from mec_client import MECClient
 from swagger_client import ApiClient
 

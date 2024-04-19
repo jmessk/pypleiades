@@ -5,5 +5,5 @@ services:
     tty: true
     volumes:
       - ./src:/pymec-client
-    working_dir: /worker
+    working_dir: /pymec-client
     command: /bin/bash
