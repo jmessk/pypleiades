@@ -11,6 +11,11 @@ def is_json_value(target_str: str) -> bool:
     return True
 
 
+class MECIOException(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 class MECResStatus(Enum):
     OK = auto()
     FAILED = auto()
@@ -21,22 +26,20 @@ class MECIO(object):
         self._client = client
         self._blob_data_api = swagger_client.BlobDataApi(client)
 
-    def get_data(self, data_id: str) -> tuple[MECResStatus, str]:
+    def get_data(self, data_id: str) -> str:
         response = self._blob_data_api.pleiades_data_download(data_id)
 
-        status = MECResStatus.FAILED if is_json_value(response) else MECResStatus.OK
-        value = (
-            response if status == MECResStatus.OK else json.loads(response)["message"]
-        )
+        if not is_json_value(response):
+            return response
+        
+        raise MECIOException("Failed to get data.")
 
-        return (status, value)
-
-    def post_data(self, file: str) -> tuple[MECResStatus, str]:
+    def post_data(self, file: str) -> str:
         response: swagger_client.ResponseDataUpload = (
             self._blob_data_api.pleiades_data_upload(file=file)
         )
 
-        status = MECResStatus.OK if response.status == "ok" else MECResStatus.FAILED
-        value = response.id if status == MECResStatus.OK else "Failed to upload data."
-
-        return (status, value)
+        if response.status == "ok":
+            return response.id
+        
+        raise MECIOException("Failed to upload data.")
