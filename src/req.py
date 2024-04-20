@@ -1,5 +1,4 @@
 from mec_requester import MECRequester
-from mec_job import MECJobStatus
 from swagger_client import ApiClient
 import time
 
@@ -16,15 +15,14 @@ def main():
     job = requester.create_job(lambda_id, input_data_id)
 
     while True:
-        status, message = job.get_status()
-        print(message)
-
-        if status == MECJobStatus.FINISHED:
+        if job.is_finished():
             break
-            
+
+        print(job.get_info())
         time.sleep(1)
+    
+    print(job.get_info())
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

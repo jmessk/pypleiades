@@ -2,6 +2,9 @@ import swagger_client
 from mec_io import MECIO
 from enum import Enum, auto
 
+import http.client
+import json
+
 
 class MECJobException(Exception):
     def __init__(self, message: str):
@@ -25,21 +28,32 @@ class MECJob(MECIO):
         self._job_api = swagger_client.JobApi(client)
         self.job_id = job_id
 
+        # Temporary client until API is updated
+        self._connection = http.client.HTTPSConnection("mecrm.dolylab.cc")
+
+    def get_info(self) -> dict[str, str]:
+        headers = {
+            "Accept": "application/json",
+        }
+
+        self._connection.request("GET", f"/api/v0.5/job/{self.job_id}", headers=headers)
+        response = self._connection.getresponse()
+
+        data = response.read().decode("utf-8")
+
+        return json.loads(data)
+
     def get_lambda_and_data(self) -> tuple[str, str]:
-        response: swagger_client.ResponseJobInfo = self._job_api.pleiades_job_info(
-            j_id=self.job_id
-        )
+        response = self.get_info()
 
-        print(response)
-
-        response = response.to_dict()
         input_lambda = self.get_data(response["lambda_id"])
         input_data = self.get_data(response["job_input_id"])
 
         return (input_lambda, input_data)
 
     def finish(self, output_data):
-        output_data_id = self.post_data(output_data)
+        # output_data_id = self.post_data(output_data)
+        output_data_id = self.post_data("./sample.txt")
 
         request = swagger_client.RequestJobUpdate(
             output=output_data_id, status="finished"
@@ -49,27 +63,7 @@ class MECJob(MECIO):
 
         print(response)
 
-    def get_status(self) -> tuple[MECJobStatus, str]:
-        response: swagger_client.ResponseJobInfo = self._job_api.pleiades_job_info(
-            j_id=self.job_id
-        ).to_dict()
+    def is_finished(self) -> bool:
+        response = self.get_info()
 
-        print(response.to_dict())
-
-        match response.status:
-            case "enqueued":
-                return (MECJobStatus.ENQUEUED, response.message)
-            case "running":
-                return (MECJobStatus.RUNNING, response.message)
-            case "error":
-                return (MECJobStatus.ERROR, response.message)
-            
-            case "finished":
-                output_data_id = response.to_dict()["job_output_id"]
-                output_data = self.get_data(output_data_id)
-                
-                return (MECJobStatus.FINISHED, output_data)
-            
-            case _:
-                return (MECJobStatus.ERROR, response.message)
-    
+        return response["job_status"] == "Finished"

@@ -7,16 +7,20 @@ def main():
     client = ApiClient()
     worker = MECWorker(client, ["python+echo"])
 
-        
+    print(worker.get_info())
+
     while True:
         job = worker.contract()
+
         if job is not None:
             break
+
         print("No job.")
 
     _, input_data = job.get_lambda_and_data()
     
     output_data = f"Hello, {input_data}!"
+    print(output_data)
     job.finish(output_data)
 
 

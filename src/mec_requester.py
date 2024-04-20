@@ -11,6 +11,7 @@ class MECRequesterException(Exception):
 class MECRequester(MECIO):
     def __init__(self, client: swagger_client.ApiClient):
         super().__init__(client)
+
         self._lambda_api = swagger_client.LambdaFunctionsApi(client)
         self._job_api = swagger_client.JobApi(client)
 
@@ -23,8 +24,6 @@ class MECRequester(MECIO):
             self._lambda_api.pleiades_lambda_create(body=request)
         )
 
-        print(response)
-
         if response.id is None:
             raise MECRequesterException("Failed to create lambda.")
 
@@ -35,12 +34,10 @@ class MECRequester(MECIO):
             input_id=input_data_id, functio=lambda_id
         )
 
-        print(request)
-
         response: swagger_client.ResponseJobCreate = self._job_api.pleiades_job_create(
             body=request
         )
 
         print(response)
-    
+
         return MECJob(self._client, response.jid)
