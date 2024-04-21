@@ -24,7 +24,9 @@ ENV PYTHON_CLIENT_DIR /usr/lib/python-client-generated
 
 COPY ./python-client-generated ${PYTHON_CLIENT_DIR}
 
-RUN pip3 install setuptools
+RUN pip3 install \
+    setuptools \
+    requests
 
 # install
 WORKDIR ${PYTHON_CLIENT_DIR}

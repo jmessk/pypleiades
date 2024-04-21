@@ -9,3 +9,9 @@
 ## Usage
 
 準備中
+
+## Todo
+
+- [x] Swagger から生成したコードを使わない実装
+- [ ] MECIO クラスに Key-Value store の API を実装
+- [ ] setuptools でパッケージ化
