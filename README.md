@@ -2,6 +2,9 @@
 
 [python-mec-generated](https://github.com/CREST-applications/python-client-generated) をラップして使いやすくしたものです。このライブラリを使用することで、API の変化に対応したクライアントが作成できます。
 
+> [!NOTE]
+> 現在は内部で Swagger から生成したコードを使用していません。
+
 ## Installation
 
 準備中
