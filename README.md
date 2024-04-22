@@ -7,14 +7,18 @@
 
 ## Installation
 
-準備中
+```sh
+git clone https://github.com/CREST-applications/pymec-client.git
+cd pymec-client
+pip3 install -e .
+```
 
 ## Usage
 
-準備中
+[`examples`](./examples) を参照
 
 ## Todo
 
 - [x] Swagger から生成したコードを使わない実装
 - [ ] MECIO クラスに Key-Value store の API を実装
-- [ ] setuptools でパッケージ化
+- [x] setuptools でパッケージ化

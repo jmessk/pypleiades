@@ -4,6 +4,6 @@ services:
     network_mode: host
     tty: true
     volumes:
-      - ./src:/pymec-client
+      - .:/pymec-client
     working_dir: /pymec-client
     command: /bin/bash
