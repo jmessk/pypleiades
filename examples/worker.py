@@ -13,6 +13,7 @@ def main():
 
         # Create a worker
         worker = MECWorker(server_url)
+
         # Register the worker
         worker.register(
             [
