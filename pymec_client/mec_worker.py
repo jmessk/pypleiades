@@ -41,12 +41,15 @@ class MECWorker(MECIO):
             raise MECWorkerException("Failed to register worker.")
 
         logging.info("Worker registered.")
+        logging.debug(response_json)
 
         self._worker_id = response_json["wid"]
 
     def contract(self, extra_tag: list[str] = [], timeout: int = 20) -> Optional[MECJob]:
         if self._worker_id is None:
             raise MECWorkerException("Worker is not registered.")
+        
+        logging.info("Contracting job...")
 
         endpoint = f"{self._server_url}/worker/{self._worker_id}/contract"
         headers = {"Accept": "application/json"}
@@ -70,6 +73,7 @@ class MECWorker(MECIO):
             return MECJob(self._server_url, response_json["job_id"])
 
         logging.info("No job.")
+        logging.debug(response_json)
         
         return None
 

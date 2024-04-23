@@ -67,7 +67,7 @@ class MECJob(MECIO):
         if response_json.get("status") != "ok":
             logging.error(response_json)
             raise MECJobException("Failed to finish job.")
-        
+
         logging.info("Job finished.")
 
     def is_finished(self) -> bool:
