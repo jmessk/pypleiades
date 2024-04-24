@@ -23,46 +23,75 @@ class MECJob(MECIO):
     def __init__(self, server_url: str, job_id: str):
         super().__init__(server_url)
         self._job_id = job_id
-
         self._output_data_id: Optional[str] = None
 
+        job_metadata = self.get_info()
+
+        self._lambda_data_id = job_metadata["lambda_id"]
+        self._input_data_id = job_metadata["job_input_id"]
+
     def get_info(self) -> dict[str, str]:
-        endpoint = f"{self._server_url}/job/{self._job_id}"
-        headers = {"Accept": "application/json"}
+        # endpoint = f"{self._server_url}/job/{self._job_id}"
+        # headers = {"Accept": "application/json"}
 
-        response = requests.get(
-            endpoint,
-            headers=headers,
-        )
+        # response = requests.get(
+        #     endpoint,
+        #     headers=headers,
+        # )
 
-        return response.json()
+        # return response.json()
+
+        response_json = self._api.get_job_metadata(self._job_id)
+
+        if response_json.get("status") != "ok":
+            logging.error(response_json)
+            raise MECJobException("Failed to fetch job metadata.")
+        
+        logging.info("Job metadata fetched.")
+        
+        return response_json
+    
+    def get_lambda_data(self) -> str:
+        return self.get_data(self._lambda_data_id)
+    
+    def get_input_data(self) -> str:
+        return self.get_data(self._input_data_id)
 
     def get_lambda_and_input_data(self) -> tuple[str, str]:
-        response = self.get_info()
-
-        input_lambda = self.get_data(response["lambda_id"])
-        input_data = self.get_data(response["job_input_id"])
-
-        return (input_lambda, input_data)
-
-    def finish(self, data: str):
-        output_data_id = self.post_data(data, "output.txt")
-
-        endpoint = f"{self._server_url}/job/{self._job_id}"
-        headers = {"Accept": "application/json"}
-
-        body_json = {
-            "output": output_data_id,
-            "status": "finished",
-        }
-
-        response = requests.post(
-            endpoint,
-            headers=headers,
-            json=body_json,
+        return (
+            self.get_lambda_data(),
+            self.get_input_data(),
         )
 
-        response_json: dict[str, str] = response.json()
+    def finish(self, data: str):
+        # output_data_id = self.post_data(data, "output.txt")
+
+        # endpoint = f"{self._server_url}/job/{self._job_id}"
+        # headers = {"Accept": "application/json"}
+
+        # body_json = {
+        #     "output": output_data_id,
+        #     "status": "finished",
+        # }
+
+        # response = requests.post(
+        #     endpoint,
+        #     headers=headers,
+        #     json=body_json,
+        # )
+
+        # response_json: dict[str, str] = response.json()
+
+        # if response_json.get("status") != "ok":
+        #     logging.error(response_json)
+        #     raise MECJobException("Failed to finish job.")
+
+        # logging.info("Job finished.")
+
+        output_data_id = self.post_data(data)
+        response_json = self._api.update_job_metadata(
+            self._job_id, output_data_id, "finished"
+        )
 
         if response_json.get("status") != "ok":
             logging.error(response_json)
@@ -71,20 +100,19 @@ class MECJob(MECIO):
         logging.info("Job finished.")
 
     def is_finished(self) -> bool:
-        """Check if the job is finished.
+        response_json = self.get_info()
 
-        Q: Why do you use the property `self._output_data_id` ?
-        A: To avoid sending unnecessary requests in get_output_data().
-           In the point when `job_status` becomes `Finished`, `output_data_id` is available.
-        """
-        response = self.get_info()
-
-        if response["job_status"] == "Finished":
+        if response_json["job_status"] == "Finished":
             logging.info("Job finished.")
-            self._output_data_id = response["job_output_id"]
+
+            # Q: Why do you use the property `self._output_data_id` ?
+            # A: To avoid sending unnecessary requests in get_output_data().
+            #    In the point when `job_status` becomes `Finished`, `output_data_id` is available.
+            self._output_data_id = response_json["job_output_id"]
+
             return True
 
-        logging.debug("job_status: %s", response["job_status"])
+        logging.info("job_status: %s", response_json["job_status"])
 
         return False
 

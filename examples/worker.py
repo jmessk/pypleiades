@@ -5,7 +5,7 @@ import logging
 def main():
     logging.basicConfig(
         level=logging.INFO,
-        format="[%(levelname)s]:[%(funcName)s()]: %(message)s",
+        format="[%(levelname)s]:[%(module)s::%(funcName)s()]: %(message)s",
     )
 
     try:
@@ -20,12 +20,18 @@ def main():
                 "pymec+echo",
             ]
         )
+        print(worker.get_info())
+
         # Wait for a job
         while (job := worker.contract()) is None:
             pass
 
+        print(job.get_info())
+
         # Get the lambda and input data
-        _, input_data = job.get_lambda_and_input_data()
+        input_data = job.get_input_data()
+        # lambda_data = job.get_lambda_data()
+        # _, input_data = job.get_lambda_and_input_data()
 
         # Process the data
         output_data = f"{input_data}, World!"

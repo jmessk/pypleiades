@@ -3,40 +3,35 @@ import requests
 import logging
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(levelname)s]:[%(funcName)s()]: %(message)s",
-)
+class MECContentType(Enum):
+    JSON = auto()
+    BLOB = auto()
 
 
-class MECClientException(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
-
-
-class MECResStatus(Enum):
-    OK = auto()
-    FAILED = auto()
-
-
-class MECClinet(object):
+class MECAPI(object):
     def __init__(self, server_url: str):
         self._server_url = server_url
 
-    def get_data(self, data_id: str) -> str:
+    def get_data(self, data_id: str) -> tuple[MECContentType, str | dict[str, str]]:
         endpoint = f"{self._server_url}/data/{data_id}/blob"
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/octet-stream"}
 
         response = requests.get(
             endpoint,
             headers=headers,
         )
 
-        logging.debug("Data fetched.")
+        # If the response is JSON, return the JSON object
+        # `response.headers` returns a `CaseInsensitiveDict`
+        if response.headers.get("content-type") == "application/json":
+            response_json: dict[str, str] = response.json()
+            logging.debug(response_json)
 
-        # blob が json の場合は成功したのか判定できない
-        # header から判定する？
-        return response.text
+            return (MECContentType.JSON, response_json)
+
+        logging.debug("content-type: application/octet-stream")
+
+        return (MECContentType.BLOB, response.text)
 
     def post_data(self, data: str, filename: str = "input") -> dict[str, str]:
         endpoint = f"{self._server_url}/data"
@@ -51,11 +46,6 @@ class MECClinet(object):
         )
 
         response_json: dict[str, str] = response.json()
-
-        if response_json.get("status") != "ok":
-            logging.error(response_json)
-            raise MECClientException("Failed to upload data.")
-
         logging.debug(response_json)
 
         return response_json
@@ -70,16 +60,11 @@ class MECClinet(object):
         )
 
         response_json = response.json()
-
-        if response_json["status"] != "ok":
-            logging.error(response_json)
-            raise MECClientException("Failed to get data metadata.")
-
         logging.debug(response_json)
 
         return response_json
 
-    def create_lambda(self, lambda_id: str, runtime: str) -> str:
+    def create_lambda(self, lambda_id: str, runtime: str) -> dict[str, str]:
         endpoint = f"{self._server_url}/lambda"
         headers = {"Accept": "application/json"}
 
@@ -96,14 +81,9 @@ class MECClinet(object):
 
         response_json: dict[str, str] = response.json()
 
-        if response_json.get("status") != "ok":
-            logging.error(response_json)
-            raise MECClientException("Failed to create lambda.")
-
-        logging.info("Lambda created.")
         logging.debug(response_json)
 
-        return response_json["id"]
+        return response_json
 
     def get_lambda_metadata(self, lambda_id: str) -> dict[str, str]:
         endpoint = f"{self._server_url}/lambda/{lambda_id}"
@@ -115,10 +95,6 @@ class MECClinet(object):
         )
 
         response_json = response.json()
-
-        if response_json["status"] != "ok":
-            logging.error(response_json)
-            raise MECClientException("Failed to get lambda metadata.")
 
         logging.debug(response_json)
 
@@ -147,11 +123,6 @@ class MECClinet(object):
 
         response_json: dict[str, str] = response.json()
 
-        if response_json.get("status") != "ok":
-            logging.error(response_json)
-            raise MECClientException("Failed to create job.")
-
-        logging.info("Job created.")
         logging.debug(response_json)
 
         return response_json
@@ -167,10 +138,6 @@ class MECClinet(object):
 
         response_json = response.json()
 
-        if response_json["status"] != "ok":
-            logging.error(response_json)
-            raise MECClientException("Failed to get job metadata.")
-
         logging.debug(response_json)
 
         return response_json
@@ -180,7 +147,7 @@ class MECClinet(object):
         job_id: str,
         output_data_id: str,
         status: str,
-    ):
+    ) -> dict[str, str]:
         endpoint = f"{self._server_url}/job/{job_id}"
         headers = {"Accept": "application/json"}
 
@@ -197,18 +164,68 @@ class MECClinet(object):
 
         response_json: dict[str, str] = response.json()
 
-        if response_json.get("status") != "ok":
-            logging.error(response_json)
-            raise MECClientException("Failed to update job metadata.")
-
-        logging.info("Job metadata updated.")
         logging.debug(response_json)
 
-    def register_worker():
-        pass
+        return response_json
 
-    def get_worker_metadata() -> dict[str, str]:
-        pass
+    def register_worker(self, runtimes: list[str]) -> dict[str, str]:
+        endpoint = f"{self._server_url}/worker"
+        headers = {"Accept": "application/json"}
 
-    def contract_job():
-        pass
+        body_json = {
+            "execulator": runtimes,
+        }
+
+        response = requests.post(
+            endpoint,
+            headers=headers,
+            json=body_json,
+        )
+
+        response_json: dict[str, str] = response.json()
+
+        logging.debug(response_json)
+
+        return response_json
+
+    def get_worker_metadata(self, worker_id: str) -> dict[str, str]:
+        endpoint = f"{self._server_url}/worker/{worker_id}"
+        headers = {"Accept": "application/json"}
+
+        response = requests.get(
+            endpoint,
+            headers=headers,
+        )
+
+        response_json: dict[str, str] = response.json()
+
+        logging.debug(response_json)
+
+        return response_json
+
+    def contract_job(
+        self,
+        worker_id: str,
+        extra_tag: list[str],
+        timeout: int,
+    ) -> dict[str, str]:
+        endpoint = f"{self._server_url}/worker/{worker_id}/contract"
+        headers = {"Accept": "application/json"}
+
+        body_json = {
+            "extra_tag": extra_tag,
+            "worker_id": worker_id,
+            "timeout": timeout,
+        }
+
+        response = requests.post(
+            endpoint,
+            headers=headers,
+            json=body_json,
+        )
+
+        response_json: dict[str, str] = response.json()
+
+        logging.debug(response_json)
+
+        return response_json

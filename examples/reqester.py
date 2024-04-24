@@ -6,7 +6,7 @@ import logging
 def main():
     logging.basicConfig(
         level=logging.INFO,
-        format="[%(levelname)s]:[%(funcName)s()]: %(message)s",
+        format="[%(levelname)s]:[%(module)s::%(funcName)s()]: %(message)s",
     )
 
     try:
@@ -24,10 +24,11 @@ def main():
 
         # Create a job
         job = requester.create_job(lambda_id, input_data_id)
+        print(job.get_info())
 
         # Wait until the job is finished
         while not job.is_finished():
-            time.sleep(1)
+            time.sleep(0.1)
 
         # Get the output data
         output = job.get_output_data()
