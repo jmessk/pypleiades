@@ -14,26 +14,6 @@ ENV LANG en_US.UTF-8
 
 # =============================================================
 
-# python mec client generated
-
-# You must `git clone` the repository brefore building the image.
-# Check the README.md.
-
-
-ENV PYTHON_CLIENT_DIR /usr/lib/python-client-generated
-
-COPY ./python-client-generated ${PYTHON_CLIENT_DIR}
-
-RUN pip3 install \
-    setuptools \
-    requests
-
-# install
-WORKDIR ${PYTHON_CLIENT_DIR}
-RUN pip3 install .
-
-# =============================================================
-
 # add user
 
 
