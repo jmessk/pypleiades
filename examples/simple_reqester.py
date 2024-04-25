@@ -3,6 +3,15 @@ import time
 import logging
 
 
+"""
+# Info
+
+この例では `requester.create_lambda()` で Requester が Lambda を作成していますが、
+本来はサービスの開発者(Developer)が Lambda を作成し、
+利用者はその Lambda を利用することが想定されています。
+"""
+
+
 def main():
     logging.basicConfig(
         level=logging.INFO,
