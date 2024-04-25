@@ -20,13 +20,13 @@ def main():
                 "pymec+echo",
             ]
         )
-        print(worker.get_info())
+        # print(worker.get_info())
 
         # Wait for a job
         while (job := worker.contract()) is None:
             pass
 
-        print(job.get_info())
+        # print(job.get_info())
 
         # Get the lambda and input data
         input_data = job.get_input_data()

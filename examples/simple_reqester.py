@@ -1,15 +1,18 @@
 from pymec_client.mec_requester import MECRequester
+from pymec_client.mec_developer import MECDeveloper
 import time
 import logging
 
 
-"""
-# Info
+def get_lambda_id(server_url: str, runtime: str) -> str:
+    # Create a developer
+    developer = MECDeveloper(server_url)
 
-この例では `requester.create_lambda()` で Requester が Lambda を作成していますが、
-本来はサービスの開発者(Developer)が Lambda を作成し、
-利用者はその Lambda を利用することが想定されています。
-"""
+    # Post lambda code and create a lambda
+    lambda_data_id = developer.post_data("dummy lambda")
+    lambda_id = developer.create_lambda(lambda_data_id, runtime)
+
+    return lambda_id
 
 
 def main():
@@ -21,19 +24,18 @@ def main():
     try:
         server_url = "https://mecrm.dolylab.cc/api/v0.5"
 
+        # Get the lambda id
+        lambda_id = get_lambda_id(server_url, "pymec+echo")
+
         # Create a requester
         requester = MECRequester(server_url)
-
-        # Post lambda code and create a lambda
-        lambda_data_id = requester.post_data("dummy lambda")
-        lambda_id = requester.create_lambda(lambda_data_id, "pymec+echo")
 
         # Post input data
         input_data_id = requester.post_data("Hello")
 
         # Create a job
         job = requester.create_job(lambda_id, input_data_id)
-        print(job.get_info())
+        # print(job.get_info())
 
         # Wait until the job is finished
         while not job.is_finished():

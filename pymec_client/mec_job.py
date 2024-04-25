@@ -31,29 +31,19 @@ class MECJob(MECIO):
         self._input_data_id = job_metadata["job_input_id"]
 
     def get_info(self) -> dict[str, str]:
-        # endpoint = f"{self._server_url}/job/{self._job_id}"
-        # headers = {"Accept": "application/json"}
-
-        # response = requests.get(
-        #     endpoint,
-        #     headers=headers,
-        # )
-
-        # return response.json()
-
         response_json = self._api.get_job_metadata(self._job_id)
 
         if response_json.get("status") != "ok":
             logging.error(response_json)
             raise MECJobException("Failed to fetch job metadata.")
-        
+
         logging.info("Job metadata fetched.")
-        
+
         return response_json
-    
+
     def get_lambda_data(self) -> str:
         return self.get_data(self._lambda_data_id)
-    
+
     def get_input_data(self) -> str:
         return self.get_data(self._input_data_id)
 
@@ -64,30 +54,6 @@ class MECJob(MECIO):
         )
 
     def finish(self, data: str):
-        # output_data_id = self.post_data(data, "output.txt")
-
-        # endpoint = f"{self._server_url}/job/{self._job_id}"
-        # headers = {"Accept": "application/json"}
-
-        # body_json = {
-        #     "output": output_data_id,
-        #     "status": "finished",
-        # }
-
-        # response = requests.post(
-        #     endpoint,
-        #     headers=headers,
-        #     json=body_json,
-        # )
-
-        # response_json: dict[str, str] = response.json()
-
-        # if response_json.get("status") != "ok":
-        #     logging.error(response_json)
-        #     raise MECJobException("Failed to finish job.")
-
-        # logging.info("Job finished.")
-
         output_data_id = self.post_data(data)
         response_json = self._api.update_job_metadata(
             self._job_id, output_data_id, "finished"
