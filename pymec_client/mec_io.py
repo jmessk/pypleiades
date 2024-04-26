@@ -31,7 +31,7 @@ class MECIO(object):
 
         return data
 
-    def post_data(self, data: str, filename: str = "input") -> str:
+    def post_data(self, data: bytes, filename: str = "input") -> str:
         response_json = self._api.post_data(data, filename)
 
         if response_json.get("status") != "ok":

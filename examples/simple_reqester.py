@@ -9,7 +9,7 @@ def get_lambda_id(server_url: str, runtime: str) -> str:
     developer = MECDeveloper(server_url)
 
     # Post lambda code and create a lambda
-    lambda_data_id = developer.post_data("dummy lambda")
+    lambda_data_id = developer.post_data(b"dummy lambda")
     lambda_id = developer.create_lambda(lambda_data_id, runtime)
 
     return lambda_id
@@ -31,7 +31,7 @@ def main():
         requester = MECRequester(server_url)
 
         # Post input data
-        input_data_id = requester.post_data("Hello")
+        input_data_id = requester.post_data(b"Hello")
 
         # Create a job
         job = requester.create_job(lambda_id, input_data_id)

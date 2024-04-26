@@ -1,6 +1,7 @@
 from enum import Enum, auto
 import requests
 import logging
+from io import BytesIO
 
 
 class MECContentType(Enum):
@@ -12,7 +13,7 @@ class MECAPI(object):
     def __init__(self, server_url: str):
         self._server_url = server_url
 
-    def get_data(self, data_id: str) -> tuple[MECContentType, str | dict[str, str]]:
+    def get_data(self, data_id: str) -> tuple[MECContentType, bytes | dict[str, str]]:
         endpoint = f"{self._server_url}/data/{data_id}/blob"
         headers = {"Accept": "application/octet-stream"}
 
@@ -31,13 +32,14 @@ class MECAPI(object):
 
         logging.debug("content-type: application/octet-stream")
 
-        return (MECContentType.BLOB, response.text)
+        return (MECContentType.BLOB, response.content)
 
-    def post_data(self, data: str, filename: str = "input") -> dict[str, str]:
+    def post_data(self, data: bytes, filename: str = "input") -> dict[str, str]:
         endpoint = f"{self._server_url}/data"
         headers = {"Accept": "application/json"}
 
-        file = {"file": (filename, data)}
+        # file = {"file": (filename, data)}
+        file = {"file": (filename, BytesIO(data))}
 
         response = requests.post(
             endpoint,

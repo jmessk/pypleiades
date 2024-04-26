@@ -82,7 +82,7 @@ class MECJob(MECIO):
 
         return False
 
-    def get_output_data(self) -> str:
+    def get_output_data(self) -> bytes:
         if self._output_data_id is None:
             raise MECJobException("Output data is not available.")
 

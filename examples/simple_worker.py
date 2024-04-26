@@ -34,8 +34,8 @@ def main():
         # _, input_data = job.get_lambda_and_input_data()
 
         # Process the data
-        output_data = f"{input_data}, World!"
-
+        input_data = input_data.decode("utf-8")
+        output_data = f"{input_data}, World!".encode("utf-8")
         # Finish the job
         job.finish(output_data)
 
