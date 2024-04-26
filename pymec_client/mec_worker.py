@@ -6,7 +6,6 @@ from .mec_io import MECIO
 from .mec_job import MECJob
 
 
-# MEC Worker
 class MECWorkerException(Exception):
     def __init__(self, message: str):
         super().__init__(message)
