@@ -20,7 +20,7 @@ class MECIO(object):
         self._server_url = server_url
         self._api = MECAPI(server_url)
 
-    def get_data(self, data_id: str) -> str:
+    def get_data(self, data_id: str) -> bytes:
         (content_type, data) = self._api.get_data(data_id)
 
         if content_type == MECContentType.JSON:
