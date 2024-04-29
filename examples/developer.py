@@ -8,7 +8,8 @@ def main():
     developer = MECDeveloper(server_url)
 
     # Create a lambda bytes
-    lambda_bytes = b"""\
+    lambda_bytes = \
+b"""\
 const message: string = "Hello, TypeScript!";
 console.log(message);
 """
@@ -31,7 +32,8 @@ async def async_main():
     developer = AsyncMECDeveloper(server_url)
 
     # Create a lambda bytes
-    lambda_bytes = b"""\
+    lambda_bytes = \
+b"""\
 const message: string = "Hello, TypeScript!";
 console.log(message);
 """
