@@ -8,9 +8,8 @@ def get_lambda_id(server_url: str, runtime: str) -> str:
     # Create a developer
     developer = MECDeveloper(server_url)
 
-    # Post lambda code and create a lambda
-    lambda_data_id = developer.post_data(b"dummy lambda")
-    lambda_id = developer.create_lambda(lambda_data_id, runtime)
+    # Create a lambda
+    lambda_id = developer.create_lambda_by_bytes(b"dummy lambda", runtime)
 
     return lambda_id
 
@@ -21,32 +20,25 @@ def main():
         format="[%(levelname)s]:[%(module)s::%(funcName)s()]: %(message)s",
     )
 
-    try:
-        server_url = "https://mecrm.dolylab.cc/api/v0.5"
+    server_url = "https://mecrm.dolylab.cc/api/v0.5"
 
-        # Get the lambda id
-        lambda_id = get_lambda_id(server_url, "pymec+echo")
+    # Get the lambda id
+    lambda_id = get_lambda_id(server_url, "pymec+echo")
 
-        # Create a requester
-        requester = MECRequester(server_url)
+    # Create a requester
+    requester = MECRequester(server_url)
 
-        # Post input data
-        input_data_id = requester.post_data(b"Hello")
+    # Create a job by lambda id and input data bytes
+    job = requester.create_job_by_bytes(lambda_id, b"Hello")
+    # print(job.get_info())
 
-        # Create a job
-        job = requester.create_job(lambda_id, input_data_id)
-        # print(job.get_info())
+    # Wait until the job is finished
+    while not job.is_finished():
+        time.sleep(0.1)
 
-        # Wait until the job is finished
-        while not job.is_finished():
-            time.sleep(0.1)
-
-        # Get the output data
-        output = job.get_output_data()
-        print(output)
-
-    except Exception as e:
-        print(e)
+    # Get the output data
+    output = job.get_output_data()
+    print(output)
 
 
 if __name__ == "__main__":
