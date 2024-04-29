@@ -80,8 +80,8 @@ class MECJob(MECIO):
 
 
 class AsyncMECJob(AsyncMECIO):
-    def __init__(self, server_url: str, job_id: str):
-        super().__init__(server_url)
+    def __init__(self, server_url: str, job_id: str, httpx_config: dict = {}):
+        super().__init__(server_url, httpx_config=httpx_config)
         self._job_id = job_id
         self._output_data_id: Optional[str] = None
 

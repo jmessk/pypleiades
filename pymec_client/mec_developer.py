@@ -38,8 +38,8 @@ class MECDeveloper(MECIO):
 
 
 class AsyncMECDeveloper(AsyncMECIO):
-    def __init__(self, server_url: str):
-        super().__init__(server_url)
+    def __init__(self, server_url: str, httpx_config: dict = {}):
+        super().__init__(server_url, httpx_config=httpx_config)
 
     async def create_lambda_by_id(self, lambda_data_id: str, runtime: str) -> str:
         response_json = await self._api.create_lambda(lambda_data_id, runtime)

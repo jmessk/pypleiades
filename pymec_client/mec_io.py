@@ -37,9 +37,9 @@ class MECIO(object):
 
 
 class AsyncMECIO(object):
-    def __init__(self, server_url: str):
+    def __init__(self, server_url: str, httpx_config: dict = {}):
         self._server_url = server_url
-        self._api = AsyncMECAPI(server_url)
+        self._api = AsyncMECAPI(server_url, httpx_config=httpx_config)
 
     async def get_data(self, data_id: str) -> bytes:
         (content_type, data) = await self._api.get_data(data_id)

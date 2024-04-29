@@ -69,11 +69,8 @@ class MECWorker(MECIO):
 
 
 class AsyncMECWorker(AsyncMECIO):
-    def __init__(
-        self,
-        server_url: str,
-    ):
-        super().__init__(server_url)
+    def __init__(self, server_url: str, httpx_config: dict = {}):
+        super().__init__(server_url, httpx_config=httpx_config)
         self._worker_id: Optional[str] = None
 
     async def register(self, runtimes: list[str]):
@@ -97,7 +94,9 @@ class AsyncMECWorker(AsyncMECIO):
 
         logging.info("Contracting job...")
 
-        response_json = await self._api.contract_job(self._worker_id, extra_tag, timeout)
+        response_json = await self._api.contract_job(
+            self._worker_id, extra_tag, timeout
+        )
 
         if response_json.get("status") != "ok":
             logging.error(response_json)
@@ -105,7 +104,11 @@ class AsyncMECWorker(AsyncMECIO):
 
         elif response_json.get("job_id"):
             logging.info("Job contracted.")
-            return await AsyncMECJob(self._server_url, response_json["job_id"]).async_init()
+            return await AsyncMECJob(
+                self._server_url,
+                response_json["job_id"],
+                httpx_config=self._api._config,
+            ).async_init()
 
         logging.info("No job.")
 

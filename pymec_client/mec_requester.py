@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from .mec_io import MECIO, AsyncMECIO
 from .mec_job import MECJob, AsyncMECJob
@@ -65,8 +66,8 @@ class MECRequester(MECIO):
 
 
 class AsyncMECRequester(AsyncMECIO):
-    def __init__(self, server_url: str):
-        super().__init__(server_url)
+    def __init__(self, server_url: str, httpx_config: dict = {}):
+        super().__init__(server_url, httpx_config=httpx_config)
 
     async def create_job_by_id(
         self,
@@ -98,7 +99,11 @@ class AsyncMECRequester(AsyncMECIO):
 
         logging.info("Job created.")
 
-        return await AsyncMECJob(self._server_url, response_json["jid"]).async_init()
+        return await AsyncMECJob(
+            self._server_url,
+            response_json["jid"],
+            httpx_config=self._api._config,
+        ).async_init()
 
     async def create_job_by_bytes(
         self,
@@ -116,4 +121,8 @@ class AsyncMECRequester(AsyncMECIO):
 
         logging.info("Job created.")
 
-        return await AsyncMECJob(self._server_url, response_json["jid"]).async_init()
+        return await AsyncMECJob(
+            self._server_url,
+            response_json["jid"],
+            httpx_config=self._api._config,
+        ).async_init()

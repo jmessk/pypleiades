@@ -235,8 +235,9 @@ class MECAPI(object):
 
 
 class AsyncMECAPI(object):
-    def __init__(self, server_url: str):
+    def __init__(self, server_url: str, httpx_config: dict = {}):
         self._server_url = server_url
+        self._config = httpx_config
 
     async def get_data(
         self, data_id: str
@@ -249,7 +250,7 @@ class AsyncMECAPI(object):
         #     headers=headers,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.get(
                 endpoint,
                 headers=headers,
@@ -280,7 +281,7 @@ class AsyncMECAPI(object):
         #     files=file,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.post(
                 endpoint,
                 headers=headers,
@@ -301,7 +302,7 @@ class AsyncMECAPI(object):
         #     headers=headers,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.get(
                 endpoint,
                 headers=headers,
@@ -327,7 +328,7 @@ class AsyncMECAPI(object):
         #     json=body_json,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.post(
                 endpoint,
                 headers=headers,
@@ -349,7 +350,7 @@ class AsyncMECAPI(object):
         #     headers=headers,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.get(
                 endpoint,
                 headers=headers,
@@ -382,7 +383,7 @@ class AsyncMECAPI(object):
         #     json=body_json,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.post(
                 endpoint,
                 headers=headers,
@@ -404,7 +405,7 @@ class AsyncMECAPI(object):
         #     headers=headers,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.get(
                 endpoint,
                 headers=headers,
@@ -436,7 +437,7 @@ class AsyncMECAPI(object):
         #     json=body_json,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.post(
                 endpoint,
                 headers=headers,
@@ -463,7 +464,7 @@ class AsyncMECAPI(object):
         #     json=body_json,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.post(
                 endpoint,
                 headers=headers,
@@ -485,7 +486,7 @@ class AsyncMECAPI(object):
         #     headers=headers,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.get(
                 endpoint,
                 headers=headers,
@@ -518,7 +519,7 @@ class AsyncMECAPI(object):
         #     json=body_json,
         # )
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(**self._config) as client:
             response = await client.post(
                 endpoint,
                 headers=headers,
