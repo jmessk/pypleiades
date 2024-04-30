@@ -17,7 +17,7 @@ class MECJob(MECIO):
 
         job_metadata = self.get_info()
 
-        self._lambda_data_id = job_metadata["lambda_id"]
+        self._lambda_data_id = job_metadata["lambda"]["id"]
         self._input_data_id = job_metadata["job_input_id"]
 
     def get_info(self) -> dict[str, str]:

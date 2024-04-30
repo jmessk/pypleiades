@@ -44,7 +44,7 @@ class MECRequester(MECIO):
 
         logging.info("Job created.")
 
-        return MECJob(self._server_url, response_json["jid"])
+        return MECJob(self._server_url, response_json["id"])
 
     def create_job_by_bytes(
         self,
@@ -62,7 +62,7 @@ class MECRequester(MECIO):
 
         logging.info("Job created.")
 
-        return MECJob(self._server_url, response_json["jid"])
+        return MECJob(self._server_url, response_json["id"])
 
 
 class AsyncMECRequester(AsyncMECIO):

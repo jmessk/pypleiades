@@ -16,11 +16,11 @@ def get_lambda_id(server_url: str, runtime: str) -> str:
 
 def main():
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="[%(levelname)s]:[%(module)s::%(funcName)s()]: %(message)s",
     )
 
-    server_url = "https://mecrm.dolylab.cc/api/v0.5"
+    server_url = "http://192.168.168.127:8332/api/v0.5"
 
     # Get the lambda id
     lambda_id = get_lambda_id(server_url, "pymec+echo")

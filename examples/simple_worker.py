@@ -4,11 +4,11 @@ import logging
 
 def main():
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="[%(levelname)s]:[%(module)s::%(funcName)s()]: %(message)s",
     )
 
-    server_url = "https://mecrm.dolylab.cc/api/v0.5"
+    server_url = "http://192.168.168.127:8332/api/v0.5"
 
     # Create a worker
     worker = MECWorker(server_url)

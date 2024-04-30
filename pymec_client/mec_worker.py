@@ -27,7 +27,7 @@ class MECWorker(MECIO):
 
         logging.info("Worker registered.")
 
-        self._worker_id = response_json["wid"]
+        self._worker_id = response_json["id"]
 
     def contract(
         self,
@@ -45,9 +45,9 @@ class MECWorker(MECIO):
             logging.error(response_json)
             raise MECWorkerException("Failed to contract job.")
 
-        elif response_json.get("job_id"):
+        elif response_json.get("job"):
             logging.info("Job contracted.")
-            return MECJob(self._server_url, response_json["job_id"])
+            return MECJob(self._server_url, response_json["job"])
 
         logging.info("No job.")
 

@@ -72,7 +72,7 @@ class MECAPI(object):
         headers = {"Accept": "application/json"}
 
         body_json = {
-            "code_id": lambda_data_id,
+            "codex": lambda_data_id,
             "runtime": runtime,
         }
 
@@ -113,9 +113,9 @@ class MECAPI(object):
         headers = {"Accept": "application/json"}
 
         body_json = {
-            "input_id": input_data_id,
-            "functio": lambda_id,
-            "extra_tag": extra_tag,
+            "input": input_data_id,
+            "lambda": lambda_id,
+            "tags": extra_tag,
         }
 
         response = requests.post(
@@ -156,7 +156,7 @@ class MECAPI(object):
 
         body_json = {
             "output": output_data_id,
-            "status": status,
+            "state": status,
         }
 
         response = requests.post(
@@ -176,7 +176,7 @@ class MECAPI(object):
         headers = {"Accept": "application/json"}
 
         body_json = {
-            "execulator": runtimes,
+            "runtime": runtimes,
         }
 
         response = requests.post(
@@ -216,8 +216,7 @@ class MECAPI(object):
         headers = {"Accept": "application/json"}
 
         body_json = {
-            "extra_tag": extra_tag,
-            "worker_id": worker_id,
+            "tags": extra_tag,
             "timeout": timeout,
         }
 
