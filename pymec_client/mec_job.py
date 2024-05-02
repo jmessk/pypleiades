@@ -26,6 +26,10 @@ class MECJob(MECIO):
         if response_json.get("status") != "ok":
             logging.error(response_json)
             raise MECJobException("Failed to fetch job metadata.")
+        
+        if response_json.get("lambda_id") is None:
+            logging.error(response_json)
+            raise MECJobException("Failed to fetch job metadata. (lambda_id is None)")
 
         logging.info("Job metadata fetched.")
 
