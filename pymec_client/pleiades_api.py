@@ -157,6 +157,7 @@ class MECAPI(object):
         body_json = {
             "output": output_data_id,
             "state": status,
+            "status": status,
         }
 
         response = requests.post(

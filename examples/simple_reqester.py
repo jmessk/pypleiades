@@ -25,6 +25,8 @@ def main():
     # Get the lambda id
     lambda_id = get_lambda_id(server_url, "pymec+echo")
 
+    time.sleep(1)
+
     # Create a requester
     requester = MECRequester(server_url)
 
@@ -34,7 +36,7 @@ def main():
 
     # Wait until the job is finished
     while not job.is_finished():
-        time.sleep(0.1)
+        time.sleep(1)
 
     # Get the output data
     output = job.get_output_data()

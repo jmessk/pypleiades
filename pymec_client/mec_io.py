@@ -1,6 +1,6 @@
 import logging
 
-from .mec_api import MECAPI, AsyncMECAPI, MECContentType
+from .pleiades_api import MECAPI, AsyncMECAPI, MECContentType
 
 
 class MECIOException(Exception):

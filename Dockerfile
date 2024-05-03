@@ -20,7 +20,7 @@ ENV LANG en_US.UTF-8
 RUN apt-get install -y curl
 
 RUN addgroup --gid 1000 docker && \
-    adduser --uid 1000 --ingroup docker --home /home/docker --shell /bin/sh --disabled-password --gecos "" docker
+    adduser --uid 1000 --ingroup docker --home /home/docker --shell /bin/bash --disabled-password --gecos "" docker
 
 RUN USER=docker && \
     GROUP=docker && \
