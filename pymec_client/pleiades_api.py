@@ -1,8 +1,17 @@
 from enum import Enum, auto
-import requests
 import httpx
 import logging
 from io import BytesIO
+from dataclasses import asdict
+
+from schema import (
+    error,
+    data,
+    kv,
+    lambda_,
+    job,
+    worker,
+)
 
 
 class MECContentType(Enum):
@@ -10,18 +19,26 @@ class MECContentType(Enum):
     BLOB = auto()
 
 
-class MECAPI(object):
+class PleiadesAPI(object):
+    __slots__ = ["_server_url"]
+
     def __init__(self, server_url: str):
         self._server_url = server_url
 
-    def get_data(self, data_id: str) -> tuple[MECContentType, bytes | dict[str, str]]:
+    def get_data(self, data_id: str) -> tuple[MECContentType, bytes | error.RespError]:
         endpoint = f"{self._server_url}/data/{data_id}/blob"
         headers = {"Accept": "application/octet-stream"}
 
-        response = requests.get(
-            endpoint,
-            headers=headers,
-        )
+        # response = requests.get(
+        #     endpoint,
+        #     headers=headers,
+        # )
+
+        with httpx.Client() as client:
+            response = client.get(
+                endpoint,
+                headers=headers,
+            )
 
         # If the response is JSON, return the JSON object
         # `response.headers` returns a `CaseInsensitiveDict`
@@ -29,58 +46,104 @@ class MECAPI(object):
             response_json: dict[str, str] = response.json()
             logging.debug(response_json)
 
-            return (MECContentType.JSON, response_json)
+            response_typed = error.RespError(
+                code=response_json["code"],
+                status=response_json["status"],
+                message=response_json["message"],
+            )
+
+            return (MECContentType.JSON, response_typed)
 
         logging.debug("content-type: application/octet-stream")
 
         return (MECContentType.BLOB, response.content)
 
-    def post_data(self, data: bytes, filename: str = "input") -> dict[str, str]:
+    def post_data(
+        self,
+        data_bytes: bytes,
+        file_name: str = "input",
+    ) -> data.RespDataCreate:
         endpoint = f"{self._server_url}/data"
         headers = {"Accept": "application/json"}
 
-        # file = {"file": (filename, data)}
-        file = {"file": (filename, BytesIO(data))}
+        file = {"file": (file_name, BytesIO(data_bytes))}
 
-        response = requests.post(
-            endpoint,
-            headers=headers,
-            files=file,
-        )
+        # response = requests.post(
+        #     endpoint,
+        #     headers=headers,
+        #     files=file,
+        # )
+
+        with httpx.Client() as client:
+            response = client.post(
+                endpoint,
+                headers=headers,
+                files=file,
+            )
 
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        return response_json
+        return data.RespDataCreate(
+            code=response_json["code"],
+            status=response_json["status"],
+            message=response_json["message"],
+            data_id=response_json["id"],
+            checksum=response_json["checksum"],
+        )
 
-    def get_data_metadata(self, data_id: str) -> dict[str, str]:
+    def get_data_metadata(self, data_id: str) -> data.RespDataInfo:
         endpoint = f"{self._server_url}/data/{data_id}"
         headers = {"Accept": "application/json"}
 
-        response = requests.get(
-            endpoint,
-            headers=headers,
-        )
+        # response = requests.get(
+        #     endpoint,
+        #     headers=headers,
+        # )
+
+        with httpx.Client() as client:
+            response = client.get(
+                endpoint,
+                headers=headers,
+            )
 
         response_json = response.json()
         logging.debug(response_json)
 
-        return response_json
+        return data.RespDataInfo(
+            code=response_json["code"],
+            status=response_json["status"],
+            message=response_json["message"],
+            data_id=response_json["id"],
+            checksum=response_json["checksum"],
+        )
 
-    def create_lambda(self, lambda_data_id: str, runtime: str) -> dict[str, str]:
+    def create_lambda(self, data_id: str, runtime: str) -> dict[str, str]:
         endpoint = f"{self._server_url}/lambda"
         headers = {"Accept": "application/json"}
 
-        body_json = {
-            "codex": lambda_data_id,
-            "runtime": runtime,
-        }
+        # body_json = {
+        #     "codex": data_id,
+        #     "runtime": runtime,
+        # }
 
-        response = requests.post(
-            endpoint,
-            headers=headers,
-            json=body_json,
+        request = lambda_.ReqLambdaCreate(
+            codex=data_id,
+            runtime=runtime,
         )
+
+        # response = requests.post(
+        #     endpoint,
+        #     headers=headers,
+        #     json=body_json,
+        # )
+
+        with httpx.Client() as client:
+            response = client.post(
+                endpoint,
+                headers=headers,
+                json=asdict(request),
+            )
 
         response_json: dict[str, str] = response.json()
 

@@ -11,7 +11,7 @@ class RespDataCreate:
     code: int
     status: str
     message: str
-    id: str
+    data_id: str
     checksum: str
 
 
@@ -19,7 +19,7 @@ class RespDataCreate:
 
 
 @dataclass(frozen=True, slots=True)
-class RespDataMeta:
+class RespDataInfo:
     """Get BLOB metadata
     method: `GET`
     endpoint: `/data/{data_id}`
@@ -28,5 +28,5 @@ class RespDataMeta:
     code: int
     status: str
     message: str
-    id: str
+    data_id: str
     checksum: str

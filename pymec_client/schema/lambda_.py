@@ -8,7 +8,7 @@ class ReqLambdaCreate:
     endpoint: `/lambda`
     """
 
-    codex: str
+    data_id: str
     runtime: str
 
 
@@ -21,14 +21,14 @@ class RespLambdaCreate:
 
     code: int
     status: str
-    id: str
+    lambda_id: str
 
 
 ###############################################################
 
 
 @dataclass(frozen=True, slots=True)
-class RespLambdaMeta:
+class RespLambdaInfo:
     """Get lambda metadata
     method: `GET`
     endpoint: `/lambda/{lambda_id}`
@@ -37,6 +37,6 @@ class RespLambdaMeta:
     code: int
     status: str
     message: str
-    id: str
-    codex: str
+    lambda_id: str
+    data_id: str
     runtime: str

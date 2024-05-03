@@ -9,7 +9,7 @@ class ReqJobCreate:
     """
 
     input: str
-    lambda: str
+    lambda_id: str
     tags: list[str]
 
 
@@ -23,14 +23,21 @@ class ResJobCreate:
     code: int
     status: str
     message: str
-    id: str
+    job_id: str
 
 
 ###############################################################
 
 
 @dataclass(frozen=True, slots=True)
-class RespJobMeta:
+class Lambda:
+    lambda_id: str
+    runtime: str
+    data_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class RespJobInfo:
     """Get job metadata
     method: `GET`
     endpoint: `/job/{job_id}`
@@ -41,13 +48,13 @@ class RespJobMeta:
     message: str
     id: str
     job_status: str
-    job_input_id: str
-    job_output_id: str
-    functio: str
+    input_data_id: str
+    output_data_id: str
+    lambda_id: str
     runtime: str
     # new
     tags: list[str]
-    lambda: str
+    lambda_: Lambda
     input: str
     output: str
     state: str
@@ -63,9 +70,9 @@ class ReqJobUpdate:
     endpoint: `/job/{job_id}`
     """
 
-    output: str
+    output_data_id: str
     status: str
-    state: str
+    job_status: str
 
 
 @dataclass(frozen=True, slots=True)
