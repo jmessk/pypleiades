@@ -1,20 +1,20 @@
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
-class RequestPostJobCreate:
+@dataclass(frozen=True, slots=True)
+class ReqJobCreate:
     """Create a job
     method: `POST`
     endpoint: `/job`
     """
 
-    input_id: str
-    functio: str
-    extra_tag: list[str]
+    input: str
+    lambda: str
+    tags: list[str]
 
 
-@dataclass(frozen=True)
-class ResponsePostJobCreate:
+@dataclass(frozen=True, slots=True)
+class ResJobCreate:
     """Create a job
     method: `POST`
     endpoint: `/job`
@@ -22,39 +22,57 @@ class ResponsePostJobCreate:
 
     code: int
     status: str
-    jid: str
+    message: str
+    id: str
 
 
-@dataclass(frozen=True)
-class ResponseGetJobMetadata:
+###############################################################
+
+
+@dataclass(frozen=True, slots=True)
+class RespJobMeta:
     """Get job metadata
     method: `GET`
-    endpoint: `/job/{jid}`
+    endpoint: `/job/{job_id}`
     """
 
     code: int
     status: str
-    job_id: str
+    message: str
+    id: str
     job_status: str
     job_input_id: str
     job_output_id: str
+    functio: str
+    runtime: str
+    # new
+    tags: list[str]
+    lambda: str
+    input: str
+    output: str
+    state: str
 
 
-@dataclass(frozen=True)
-class RequestPostJobMetadata:
+###############################################################
+
+
+@dataclass(frozen=True, slots=True)
+class ReqJobUpdate:
     """Update job metadata
     method: `POST`
-    endpoint: `/job/{jid}`
+    endpoint: `/job/{job_id}`
     """
+
     output: str
     status: str
+    state: str
 
 
-@dataclass(frozen=True)
-class ResponsePostJobMetadata:
+@dataclass(frozen=True, slots=True)
+class RespJobUpdate:
     """Update job metadata
     method: `POST`
-    endpoint: `/job/{jid}`
+    endpoint: `/job/{job_id}`
     """
 
     code: int
