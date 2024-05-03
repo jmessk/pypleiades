@@ -27,7 +27,7 @@ MECRM API を簡単に扱うことができるライブラリです。
 ## Installation
 
 ```sh
-git clone https://github.com/CREST-applications/pymec-client.git
+git clone https://github.com/CREST-applications/pymec-client.git -b main
 cd pymec-client
 pip3 install -e .
 ```
