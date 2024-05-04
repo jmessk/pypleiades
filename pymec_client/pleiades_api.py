@@ -4,14 +4,10 @@ import logging
 from io import BytesIO
 from dataclasses import asdict
 
-from schema import (
+from pleiades_api import (
     error,
-    data,
-    kv,
-    lambda_,
-    job,
-    worker,
 )
+from pymec_client.pleiades_api import data_api, job_api, kv_api, lambda_api, worker_api
 
 
 class MECContentType(Enum):
@@ -29,11 +25,6 @@ class PleiadesAPI(object):
         endpoint = f"{self._server_url}/data/{data_id}/blob"
         headers = {"Accept": "application/octet-stream"}
 
-        # response = requests.get(
-        #     endpoint,
-        #     headers=headers,
-        # )
-
         with httpx.Client() as client:
             response = client.get(
                 endpoint,
@@ -46,11 +37,7 @@ class PleiadesAPI(object):
             response_json: dict[str, str] = response.json()
             logging.debug(response_json)
 
-            response_typed = error.RespError(
-                code=response_json["code"],
-                status=response_json["status"],
-                message=response_json["message"],
-            )
+            response_typed = error.RespError(**response_json)
 
             return (MECContentType.JSON, response_typed)
 
@@ -62,17 +49,11 @@ class PleiadesAPI(object):
         self,
         data_bytes: bytes,
         file_name: str = "input",
-    ) -> data.RespDataCreate:
+    ) -> data_api.RespDataCreate:
         endpoint = f"{self._server_url}/data"
         headers = {"Accept": "application/json"}
 
         file = {"file": (file_name, BytesIO(data_bytes))}
-
-        # response = requests.post(
-        #     endpoint,
-        #     headers=headers,
-        #     files=file,
-        # )
 
         with httpx.Client() as client:
             response = client.post(
@@ -84,22 +65,11 @@ class PleiadesAPI(object):
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        return data.RespDataCreate(
-            code=response_json["code"],
-            status=response_json["status"],
-            message=response_json["message"],
-            data_id=response_json["id"],
-            checksum=response_json["checksum"],
-        )
+        return data_api.RespDataCreate(**response_json)
 
-    def get_data_metadata(self, data_id: str) -> data.RespDataInfo:
+    def get_data_info(self, data_id: str) -> data_api.RespDataInfo:
         endpoint = f"{self._server_url}/data/{data_id}"
         headers = {"Accept": "application/json"}
-
-        # response = requests.get(
-        #     endpoint,
-        #     headers=headers,
-        # )
 
         with httpx.Client() as client:
             response = client.get(
@@ -110,24 +80,18 @@ class PleiadesAPI(object):
         response_json = response.json()
         logging.debug(response_json)
 
-        return data.RespDataInfo(
-            code=response_json["code"],
-            status=response_json["status"],
-            message=response_json["message"],
-            data_id=response_json["id"],
-            checksum=response_json["checksum"],
-        )
+        return data_api.RespDataInfo(**response_json)
 
     def create_lambda(self, data_id: str, runtime: str) -> dict[str, str]:
         endpoint = f"{self._server_url}/lambda"
         headers = {"Accept": "application/json"}
 
-        # body_json = {
-        #     "codex": data_id,
-        #     "runtime": runtime,
-        # }
+        body_json = {
+            "codex": data_id,
+            "runtime": runtime,
+        }
 
-        request = lambda_.ReqLambdaCreate(
+        request = lambda_api.ReqLambdaCreate(
             codex=data_id,
             runtime=runtime,
         )
