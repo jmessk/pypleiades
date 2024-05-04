@@ -1,4 +1,6 @@
 from attrs import define, field
+import httpx
+import logging
 
 
 @define(slots=True, frozen=True)

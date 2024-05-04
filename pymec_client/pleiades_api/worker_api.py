@@ -1,4 +1,6 @@
 from attrs import define, field
+import httpx
+import logging
 
 
 @define(slots=True, frozen=True)
@@ -12,7 +14,10 @@ class ReqWorkerRegist:
     }
     """
 
-    runtime: list[str]
+    runtimes: list[str]
+
+    def to_dict(self):
+        return {"runtime": self.runtimes}
 
 
 @define(slots=True, frozen=True)
@@ -35,6 +40,44 @@ class RespWorkerRegist:
     message: str
     worker_id: str = field(alias="id")
     runtimes: list[str] = field(alias="runtime")
+
+
+def register_worker(server_url, runtimes: list[str]) -> RespWorkerRegist:
+    endpoint = f"{server_url}/worker"
+    headers = {"Accept": "application/json"}
+
+    request_json = ReqWorkerRegist(runtimes=runtimes).to_dict()
+
+    with httpx.Client() as client:
+        response = client.post(
+            endpoint,
+            headers=headers,
+            json=request_json,
+        )
+
+    response_json: dict[str, str] = response.json()
+    logging.debug(response_json)
+
+    return RespWorkerRegist(**response_json)
+
+
+async def register_worker_async(server_url, runtimes: list[str]) -> RespWorkerRegist:
+    endpoint = f"{server_url}/worker"
+    headers = {"Accept": "application/json"}
+
+    request_json = ReqWorkerRegist(runtimes=runtimes).to_dict()
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            endpoint,
+            headers=headers,
+            json=request_json,
+        )
+
+    response_json: dict[str, str] = response.json()
+    logging.debug(response_json)
+
+    return RespWorkerRegist(**response_json)
 
 
 ###############################################################
@@ -85,6 +128,34 @@ class RespWorkerContract:
     job_id: str = field(alias="id")
 
 
+def contract_job(
+    server_url,
+    worker_id: str,
+    tags: list[str],
+    timeout: int,
+) -> RespWorkerContract:
+    endpoint = f"{server_url}/worker/{worker_id}/contract"
+    headers = {"Accept": "application/json"}
+
+    request_json = ReqWorkerContract(
+        worker_id=worker_id,
+        tags=tags,
+        timeout=timeout,
+    ).to_dict()
+
+    with httpx.Client() as client:
+        response = client.post(
+            endpoint,
+            headers=headers,
+            json=request_json,
+        )
+
+    response_json: dict[str, str] = response.json()
+    logging.debug(response_json)
+
+    return RespWorkerContract(**response_json)
+
+
 ###############################################################
 
 
@@ -108,3 +179,19 @@ class RespWorkerInfo:
     message: str
     worker_id: str = field(alias="id")
     runtimes: list[str] = field(alias="runtime")
+
+
+def get_worker_info(server_url, worker_id: str) -> RespWorkerInfo:
+    endpoint = f"{server_url}/worker/{worker_id}"
+    headers = {"Accept": "application/json"}
+
+    with httpx.Client() as client:
+        response = client.get(
+            endpoint,
+            headers=headers,
+        )
+
+    response_json: dict[str, str] = response.json()
+    logging.debug(response_json)
+
+    return RespWorkerInfo(**response_json)

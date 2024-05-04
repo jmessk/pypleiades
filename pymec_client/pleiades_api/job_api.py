@@ -1,4 +1,9 @@
 from attrs import define, field
+import httpx
+import logging
+
+
+###############################################################
 
 
 @define(slots=True, frozen=True)
@@ -27,7 +32,7 @@ class ReqJobCreate:
 
 
 @define(slots=True, frozen=True)
-class ResJobCreate:
+class RespJobCreate:
     """Create a job
     method: `POST`
     endpoint: `/job`
@@ -44,6 +49,62 @@ class ResJobCreate:
     status: str
     message: str
     job_id: str = field(alias="id")
+
+
+def create_job(
+    server_url,
+    lambda_id: str,
+    data_id: str,
+    tags: list[str],
+) -> RespJobCreate:
+    endpoint = f"{server_url}/job"
+    headers = {"Accept": "application/json"}
+
+    request_json = ReqJobCreate(
+        data_id=data_id,
+        lambda_id=lambda_id,
+        tags=tags,
+    ).to_dict()
+
+    with httpx.Client() as client:
+        response = client.post(
+            endpoint,
+            headers=headers,
+            json=request_json,
+        )
+
+    response_json: dict[str, str] = response.json()
+    logging.debug(response_json)
+
+    return RespJobCreate(**response_json)
+
+
+async def create_job_async(
+    server_url,
+    lambda_id: str,
+    data_id: str,
+    tags: list[str],
+) -> RespJobCreate:
+    endpoint = f"{server_url}/job"
+    headers = {"Accept": "application/json"}
+
+    request_json = ReqJobCreate(
+        data_id=data_id,
+        lambda_id=lambda_id,
+        tags=tags,
+    ).to_dict()
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            endpoint,
+            headers=headers,
+            json=request_json,
+        )
+
+    response_json: dict[str, str] = response.json()
+    logging.debug(response_json)
+
+    return RespJobCreate(**response_json)
 
 
 ###############################################################
@@ -91,19 +152,59 @@ class RespJobInfo:
 
     code: int
     status: str
-    message: str
     job_id: str = field(alias="id")
     job_status: str
     input_data_id: str = field(alias="job_input_id")
     output_data_id: str = field(alias="job_output_id")
     lambda_id: str = field(alias="functio")
-    runtime: str
-    # new
-    tags: list[str]
-    lambda_: Lambda
-    input: str
-    output: str
+    lambda_: Lambda = field(alias="lambda")
     state: str
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            code=data["code"],
+            status=data["status"],
+            job_id=data["id"],
+            job_status=data["job_status"],
+            input_data_id=data["job_input_id"],
+            output_data_id=data["job_output_id"],
+            lambda_id=data["functio"],
+            lambda_=Lambda(**data["lambda"]),
+            state=data["state"],
+        )
+
+
+def get_job_info(server_url, job_id: str) -> RespJobInfo:
+    endpoint = f"{server_url}/job/{job_id}"
+    headers = {"Accept": "application/json"}
+
+    with httpx.Client() as client:
+        response = client.get(
+            endpoint,
+            headers=headers,
+        )
+
+    response_json = response.json()
+    logging.debug(response_json)
+
+    return RespJobInfo.from_dict(response_json)
+
+
+async def get_job_info_async(server_url, job_id: str) -> RespJobInfo:
+    endpoint = f"{server_url}/job/{job_id}"
+    headers = {"Accept": "application/json"}
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            endpoint,
+            headers=headers,
+        )
+
+    response_json = response.json()
+    logging.debug(response_json)
+
+    return RespJobInfo.from_dict(response_json)
 
 
 ###############################################################
@@ -151,3 +252,59 @@ class RespJobUpdate:
     code: int
     status: str
     message: str
+
+
+def update_job_status(
+    server_url,
+    job_id: str,
+    output_data_id: str,
+    status: str,
+) -> RespJobUpdate:
+    endpoint = f"{server_url}/job/{job_id}"
+    headers = {"Accept": "application/json"}
+
+    request_json = ReqJobUpdate(
+        output_data_id=output_data_id,
+        status=status,
+        job_status=status,
+    ).to_dict()
+
+    with httpx.Client() as client:
+        response = client.post(
+            endpoint,
+            headers=headers,
+            json=request_json,
+        )
+
+    response_json: dict[str, str] = response.json()
+    logging.debug(response_json)
+
+    return RespJobUpdate(**response_json)
+
+
+async def update_job_status_async(
+    server_url,
+    job_id: str,
+    output_data_id: str,
+    status: str,
+) -> RespJobUpdate:
+    endpoint = f"{server_url}/job/{job_id}"
+    headers = {"Accept": "application/json"}
+
+    request_json = ReqJobUpdate(
+        output_data_id=output_data_id,
+        status=status,
+        job_status=status,
+    ).to_dict()
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            endpoint,
+            headers=headers,
+            json=request_json,
+        )
+
+    response_json: dict[str, str] = response.json()
+    logging.debug(response_json)
+
+    return RespJobUpdate(**response_json)
