@@ -1,6 +1,7 @@
 from attrs import define, field
 import httpx
 import logging
+from result import Result, Ok, Err
 
 
 @define(slots=True, frozen=True)

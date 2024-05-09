@@ -1,6 +1,9 @@
 from attrs import define, field
 import httpx
 import logging
+from result import Result, Ok, Err
+
+from api_types import Code
 
 
 ###############################################################
@@ -56,7 +59,7 @@ def create_job(
     lambda_id: str,
     data_id: str,
     tags: list[str],
-) -> RespJobCreate:
+) -> Result[RespJobCreate, dict]:
     endpoint = f"{server_url}/job"
     headers = {"Accept": "application/json"}
 
@@ -76,7 +79,10 @@ def create_job(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    return RespJobCreate(**response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespJobCreate(**response_json))
 
 
 async def create_job_async(
@@ -84,7 +90,7 @@ async def create_job_async(
     lambda_id: str,
     data_id: str,
     tags: list[str],
-) -> RespJobCreate:
+) -> Result[RespJobCreate, dict]:
     endpoint = f"{server_url}/job"
     headers = {"Accept": "application/json"}
 
@@ -104,7 +110,10 @@ async def create_job_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    return RespJobCreate(**response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespJobCreate(**response_json))
 
 
 ###############################################################
@@ -175,7 +184,7 @@ class RespJobInfo:
         )
 
 
-def get_job_info(server_url, job_id: str) -> RespJobInfo:
+def get_job_info(server_url, job_id: str) -> Result[RespJobInfo, dict]:
     endpoint = f"{server_url}/job/{job_id}"
     headers = {"Accept": "application/json"}
 
@@ -188,10 +197,13 @@ def get_job_info(server_url, job_id: str) -> RespJobInfo:
     response_json = response.json()
     logging.debug(response_json)
 
-    return RespJobInfo.from_dict(response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespJobInfo.from_dict(response_json))
 
 
-async def get_job_info_async(server_url, job_id: str) -> RespJobInfo:
+async def get_job_info_async(server_url, job_id: str) -> Result[RespJobInfo, dict]:
     endpoint = f"{server_url}/job/{job_id}"
     headers = {"Accept": "application/json"}
 
@@ -204,7 +216,10 @@ async def get_job_info_async(server_url, job_id: str) -> RespJobInfo:
     response_json = response.json()
     logging.debug(response_json)
 
-    return RespJobInfo.from_dict(response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespJobInfo.from_dict(response_json))
 
 
 ###############################################################
@@ -259,7 +274,7 @@ def update_job_status(
     job_id: str,
     output_data_id: str,
     status: str,
-) -> RespJobUpdate:
+) -> Result[RespJobUpdate, dict]:
     endpoint = f"{server_url}/job/{job_id}"
     headers = {"Accept": "application/json"}
 
@@ -279,7 +294,10 @@ def update_job_status(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    return RespJobUpdate(**response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespJobUpdate(**response_json))
 
 
 async def update_job_status_async(
@@ -287,7 +305,7 @@ async def update_job_status_async(
     job_id: str,
     output_data_id: str,
     status: str,
-) -> RespJobUpdate:
+) -> Result[RespJobUpdate, dict]:
     endpoint = f"{server_url}/job/{job_id}"
     headers = {"Accept": "application/json"}
 
@@ -307,4 +325,7 @@ async def update_job_status_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    return RespJobUpdate(**response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespJobUpdate(**response_json))

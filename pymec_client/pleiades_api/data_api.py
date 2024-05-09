@@ -3,19 +3,15 @@ from enum import Enum, auto
 import httpx
 import logging
 import io
+from result import Result, Ok, Err
 
-import error
+from api_types import Code
 
 
 ###############################################################
 
 
-class ContentType(Enum):
-    JSON = auto()
-    BLOB = auto()
-
-
-def get_data(server_url, data_id: str) -> tuple[ContentType, bytes | error.RespError]:
+def get_data(server_url, data_id: str) -> Result[bytes, dict]:
     endpoint = f"{server_url}/data/{data_id}/blob"
     headers = {"Accept": "application/octet-stream"}
 
@@ -31,16 +27,14 @@ def get_data(server_url, data_id: str) -> tuple[ContentType, bytes | error.RespE
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        return (ContentType.JSON, error.RespError(**response_json))
+        return Err(response_json)
 
     logging.debug("content-type: application/octet-stream")
 
-    return (ContentType.BLOB, response.content)
+    return Ok(response.content)
 
 
-async def get_data_async(
-    server_url, data_id: str
-) -> tuple[ContentType, bytes | error.RespError]:
+async def get_data_async(server_url, data_id: str) -> Result[bytes, dict]:
     endpoint = f"{server_url}/data/{data_id}/blob"
     headers = {"Accept": "application/octet-stream"}
 
@@ -56,11 +50,11 @@ async def get_data_async(
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        return (ContentType.JSON, error.RespError(**response_json))
+        return Err(response_json)
 
     logging.debug("content-type: application/octet-stream")
 
-    return (ContentType.BLOB, response.content)
+    return Ok(response.content)
 
 
 ###############################################################
@@ -93,7 +87,7 @@ def post_data(
     server_url,
     data_bytes: bytes,
     file_name: str = "input",
-) -> RespDataCreate:
+) -> Result[RespDataCreate, dict]:
     endpoint = f"{server_url}/data"
     headers = {"Accept": "application/json"}
 
@@ -109,14 +103,17 @@ def post_data(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    return RespDataCreate(**response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespDataCreate(**response_json))
 
 
 async def post_data_async(
     server_url,
     data_bytes: bytes,
     file_name: str = "input",
-) -> RespDataCreate:
+) -> Result[RespDataCreate, dict]:
     endpoint = f"{server_url}/data"
     headers = {"Accept": "application/json"}
 
@@ -132,7 +129,10 @@ async def post_data_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    return RespDataCreate(**response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespDataCreate(**response_json))
 
 
 ###############################################################
@@ -161,7 +161,7 @@ class RespDataInfo:
     checksum: str
 
 
-def get_data_info(server_url, data_id: str) -> RespDataInfo:
+def get_data_info(server_url, data_id: str) -> Result[RespDataInfo, dict]:
     endpoint = f"{server_url}/data/{data_id}"
     headers = {"Accept": "application/json"}
 
@@ -174,10 +174,13 @@ def get_data_info(server_url, data_id: str) -> RespDataInfo:
     response_json = response.json()
     logging.debug(response_json)
 
-    return RespDataInfo(**response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespDataInfo(**response_json))
 
 
-async def get_data_info_async(server_url, data_id: str) -> RespDataInfo:
+async def get_data_info_async(server_url, data_id: str) -> Result[RespDataInfo, dict]:
     endpoint = f"{server_url}/data/{data_id}"
     headers = {"Accept": "application/json"}
 
@@ -190,4 +193,7 @@ async def get_data_info_async(server_url, data_id: str) -> RespDataInfo:
     response_json = response.json()
     logging.debug(response_json)
 
-    return RespDataInfo(**response_json)
+    if response_json.get("code") != Code.OK:
+        return Err(response_json)
+
+    return Ok(RespDataInfo(**response_json))

@@ -6,4 +6,8 @@ services:
     volumes:
       - .:/pymec-client
     working_dir: /pymec-client
-    command: /bin/bash
+    command: >
+      /bin/bash -c "
+      pip3 install -e .
+      && /bin/bash"
+    
