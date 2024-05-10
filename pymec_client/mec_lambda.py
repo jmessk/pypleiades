@@ -30,6 +30,32 @@ class MECLambda(MECObject):
 
     # properties
 
+    # info
+
+    def info(self) -> lambda_api.RespLambdaInfo:
+        if self._id is None:
+            raise Exception()
+
+        result = lambda_api.get_lambda_info(self._server_url, self._id)
+
+        if result.is_err():
+            self._logger.error(result.unwrap_err())
+            raise Exception()
+
+        return result.unwrap()
+    
+    async def info_async(self) -> lambda_api.RespLambdaInfo:
+        if self._id is None:
+            raise Exception()
+        
+        result = await lambda_api.get_lambda_info_async(self._server_url, self._id)
+
+        if result.is_err():
+            self._logger.error(result.unwrap_err())
+            raise Exception()
+
+        return result.unwrap()
+
     # code
 
     def set_code(self, blob: MECBlob):
@@ -50,4 +76,4 @@ class MECLambda(MECObject):
 
         return self
 
-    
+    # 

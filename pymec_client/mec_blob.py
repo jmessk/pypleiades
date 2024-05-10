@@ -34,6 +34,32 @@ class MECBlob(MECObject):
     @property
     def data(self) -> bytes:
         return self._data
+    
+    # info
+
+    def info(self) -> data_api.RespDataInfo:
+        if self._id is None:
+            raise MECBlobException("No data to get info")
+
+        result = data_api.get_data_info(self._server_url, self._id)
+
+        if result.is_err():
+            self._logger.error(result.unwrap_err())
+            raise MECBlobException("Failed to get data info")
+
+        return result.unwrap()
+    
+    async def info_async(self) -> data_api.RespDataInfo:
+        if self._id is None:
+            raise MECBlobException("No data to get info")
+        
+        result = await data_api.get_data_info_async(self._server_url, self._id)
+
+        if result.is_err():
+            self._logger.error(result.unwrap_err())
+            raise MECBlobException("Failed to get data info")
+        
+        return result.unwrap()
 
     # from bytes
 

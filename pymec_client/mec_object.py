@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 from typing_extensions import Self
 import logging
 
@@ -14,7 +14,7 @@ class MECObject(object):
     ):
         self._server_url = server_url
         self._id = id
-        self._logger = logger or logging.getLogger(__name__)
+        self._logger: logging.Logger = logger or logging.getLogger(__name__)
 
     @property
     def id(self) -> str:
@@ -22,11 +22,8 @@ class MECObject(object):
             raise ValueError("id is not set")
         return self._id
 
-    def info(self) -> dict:
+    def info(self) -> Any:
         raise NotImplementedError()
 
     def has_remote(self) -> bool:
         return self._id is not None
-
-    def upload() -> Self:
-        raise NotImplementedError()
