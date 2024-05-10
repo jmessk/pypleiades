@@ -1,10 +1,10 @@
 from typing import Optional
 from typing_extensions import Self
-import aiofiles
 import logging
+import aiofiles
 
-from mec_object import MECObject
-from pleiades_api import data_api
+from .api import data_api
+from .mec_object import MECObject
 
 
 class MECBlobException(Exception):
@@ -33,15 +33,17 @@ class MECBlob(MECObject):
 
     @property
     def data(self) -> bytes:
+        if self._data is None:
+            raise ValueError("data is not set")
         return self._data
     
     # info
 
-    def info(self) -> data_api.RespDataInfo:
-        if self._id is None:
+    def remote_info(self) -> data_api.RespDataInfo:
+        if not self.has_remote():
             raise MECBlobException("No data to get info")
 
-        result = data_api.get_data_info(self._server_url, self._id)
+        result = data_api.info(self._server_url, self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -49,11 +51,11 @@ class MECBlob(MECObject):
 
         return result.unwrap()
     
-    async def info_async(self) -> data_api.RespDataInfo:
-        if self._id is None:
+    async def remote_info_async(self) -> data_api.RespDataInfo:
+        if not self.has_remote():
             raise MECBlobException("No data to get info")
         
-        result = await data_api.get_data_info_async(self._server_url, self._id)
+        result = await data_api.info_async(self._server_url, self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -110,7 +112,7 @@ class MECBlob(MECObject):
     # upload
 
     def upload(self) -> Self:
-        if self._id is not None:
+        if self.has_remote():
             raise MECBlobException("Data already exists on remote server")
 
         if self._data is None:
@@ -122,13 +124,13 @@ class MECBlob(MECObject):
             self._logger.error(result.unwrap_err())
             raise MECBlobException("Failed to upload data")
 
-        self._id = result.unwrap()
+        self._id = result.unwrap().data_id
         self._logger.info(f"Uploaded data to {self._id}")
 
         return self
 
     async def upload_async(self) -> Self:
-        if self._id is not None:
+        if self.has_remote():
             raise MECBlobException("Data already exists on remote server")
 
         if self._data is None:
@@ -140,7 +142,7 @@ class MECBlob(MECObject):
             self._logger.error(result.unwrap_err())
             raise MECBlobException("Failed to upload data")
 
-        self._id = result.unwrap()
+        self._id = result.unwrap().data_id
         self._logger.info(f"Uploaded data to {self._id}")
 
         return self
@@ -151,7 +153,7 @@ class MECBlob(MECObject):
     # そのほうがユーザが意図しないタイミングでのダウンロードを防げる。
 
     def download(self) -> Self:
-        if self._id is None:
+        if not self.has_remote():
             raise MECBlobException("No data to download")
 
         if self._data is not None:
@@ -168,7 +170,7 @@ class MECBlob(MECObject):
         return self
 
     async def download_async(self) -> Self:
-        if self._id is None:
+        if not self.has_remote():
             raise MECBlobException("No data to download")
 
         if self._data is not None:

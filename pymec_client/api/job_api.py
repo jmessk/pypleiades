@@ -55,7 +55,7 @@ class RespJobCreate:
 
 
 def create_job(
-    server_url,
+    server_url: str,
     lambda_id: str,
     data_id: str,
     tags: list[str],
@@ -86,7 +86,7 @@ def create_job(
 
 
 async def create_job_async(
-    server_url,
+    server_url: str,
     lambda_id: str,
     data_id: str,
     tags: list[str],
@@ -184,7 +184,7 @@ class RespJobInfo:
         )
 
 
-def get_job_info(server_url, job_id: str) -> Result[RespJobInfo, dict]:
+def info(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
     endpoint = f"{server_url}/job/{job_id}"
     headers = {"Accept": "application/json"}
 
@@ -203,7 +203,7 @@ def get_job_info(server_url, job_id: str) -> Result[RespJobInfo, dict]:
     return Ok(RespJobInfo.from_dict(response_json))
 
 
-async def get_job_info_async(server_url, job_id: str) -> Result[RespJobInfo, dict]:
+async def info_async(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
     endpoint = f"{server_url}/job/{job_id}"
     headers = {"Accept": "application/json"}
 
@@ -269,8 +269,8 @@ class RespJobUpdate:
     message: str
 
 
-def update_job_status(
-    server_url,
+def update_status(
+    server_url: str,
     job_id: str,
     output_data_id: str,
     status: str,
@@ -300,8 +300,8 @@ def update_job_status(
     return Ok(RespJobUpdate(**response_json))
 
 
-async def update_job_status_async(
-    server_url,
+async def update_status_async(
+    server_url: str,
     job_id: str,
     output_data_id: str,
     status: str,

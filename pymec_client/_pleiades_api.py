@@ -4,10 +4,10 @@ import logging
 from io import BytesIO
 from dataclasses import asdict
 
-from pleiades_api import (
+from api import (
     error,
 )
-from pymec_client.pleiades_api import data_api, job_api, kv_api, lambda_api, worker_api
+from pymec_client.api import data_api, job_api, kv_api, lambda_api, worker_api
 
 
 class MECContentType(Enum):

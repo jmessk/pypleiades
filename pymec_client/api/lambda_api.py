@@ -49,8 +49,8 @@ class RespLambdaCreate:
     lambda_id: str = field(alias="id")
 
 
-def create_lambda(
-    server_url, data_id: str, runtime: str
+def create(
+    server_url: str, data_id: str, runtime: str
 ) -> Result[RespLambdaCreate, dict]:
     endpoint = f"{server_url}/lambda"
     headers = {"Accept": "application/json"}
@@ -76,8 +76,8 @@ def create_lambda(
     return Ok(RespLambdaCreate(**response_json))
 
 
-async def create_lambda_async(
-    server_url, data_id: str, runtime: str
+async def create_async(
+    server_url: str, data_id: str, runtime: str
 ) -> Result[RespLambdaCreate, dict]:
     endpoint = f"{server_url}/lambda"
     headers = {"Accept": "application/json"}
@@ -130,7 +130,7 @@ class RespLambdaInfo:
     runtime: str
 
 
-def get_lambda_info(server_url, lambda_id: str) -> Result[RespLambdaInfo, dict]:
+def info(server_url: str, lambda_id: str) -> Result[RespLambdaInfo, dict]:
     endpoint = f"{server_url}/lambda/{lambda_id}"
     headers = {"Accept": "application/json"}
 
@@ -149,8 +149,8 @@ def get_lambda_info(server_url, lambda_id: str) -> Result[RespLambdaInfo, dict]:
     return Ok(RespLambdaInfo(**response_json))
 
 
-async def get_lambda_info_async(
-    server_url, lambda_id: str
+async def info_async(
+    server_url: str, lambda_id: str
 ) -> Result[RespLambdaInfo, dict]:
     endpoint = f"{server_url}/lambda/{lambda_id}"
     headers = {"Accept": "application/json"}

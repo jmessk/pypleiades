@@ -11,7 +11,7 @@ from api_types import Code
 ###############################################################
 
 
-def get_data(server_url, data_id: str) -> Result[bytes, dict]:
+def get_data(server_url: str, data_id: str) -> Result[bytes, dict]:
     endpoint = f"{server_url}/data/{data_id}/blob"
     headers = {"Accept": "application/octet-stream"}
 
@@ -34,7 +34,7 @@ def get_data(server_url, data_id: str) -> Result[bytes, dict]:
     return Ok(response.content)
 
 
-async def get_data_async(server_url, data_id: str) -> Result[bytes, dict]:
+async def get_data_async(server_url: str, data_id: str) -> Result[bytes, dict]:
     endpoint = f"{server_url}/data/{data_id}/blob"
     headers = {"Accept": "application/octet-stream"}
 
@@ -84,7 +84,7 @@ class RespDataCreate:
 
 
 def post_data(
-    server_url,
+    server_url: str,
     data_bytes: bytes,
     file_name: str = "input",
 ) -> Result[RespDataCreate, dict]:
@@ -110,7 +110,7 @@ def post_data(
 
 
 async def post_data_async(
-    server_url,
+    server_url: str,
     data_bytes: bytes,
     file_name: str = "input",
 ) -> Result[RespDataCreate, dict]:
@@ -161,7 +161,7 @@ class RespDataInfo:
     checksum: str
 
 
-def get_data_info(server_url, data_id: str) -> Result[RespDataInfo, dict]:
+def info(server_url: str, data_id: str) -> Result[RespDataInfo, dict]:
     endpoint = f"{server_url}/data/{data_id}"
     headers = {"Accept": "application/json"}
 
@@ -180,7 +180,7 @@ def get_data_info(server_url, data_id: str) -> Result[RespDataInfo, dict]:
     return Ok(RespDataInfo(**response_json))
 
 
-async def get_data_info_async(server_url, data_id: str) -> Result[RespDataInfo, dict]:
+async def info_async(server_url: str, data_id: str) -> Result[RespDataInfo, dict]:
     endpoint = f"{server_url}/data/{data_id}"
     headers = {"Accept": "application/json"}
 

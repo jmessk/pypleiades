@@ -48,7 +48,7 @@ class RespWorkerRegist:
     runtimes: list[str] = field(alias="runtime")
 
 
-def register_worker(server_url, runtimes: list[str]) -> Result[RespWorkerRegist, dict]:
+def register(server_url: str, runtimes: list[str]) -> Result[RespWorkerRegist, dict]:
     endpoint = f"{server_url}/worker"
     headers = {"Accept": "application/json"}
 
@@ -70,8 +70,8 @@ def register_worker(server_url, runtimes: list[str]) -> Result[RespWorkerRegist,
     return Ok(RespWorkerRegist(**response_json))
 
 
-async def register_worker_async(
-    server_url, runtimes: list[str]
+async def register_async(
+    server_url: str, runtimes: list[str]
 ) -> Result[RespWorkerRegist, dict]:
     endpoint = f"{server_url}/worker"
     headers = {"Accept": "application/json"}
@@ -142,8 +142,8 @@ class RespWorkerContract:
     job_id: str = field(alias="id")
 
 
-def contract_job(
-    server_url,
+def contract(
+    server_url: str,
     worker_id: str,
     tags: list[str],
     timeout: int,
@@ -173,8 +173,8 @@ def contract_job(
     return Ok(RespWorkerContract(**response_json))
 
 
-async def contract_job_async(
-    server_url,
+async def contract_async(
+    server_url: str,
     worker_id: str,
     tags: list[str],
     timeout: int,
@@ -229,7 +229,7 @@ class RespWorkerInfo:
     runtimes: list[str] = field(alias="runtime")
 
 
-def get_worker_info(server_url, worker_id: str) -> Result[RespWorkerInfo, dict]:
+def info(server_url: str, worker_id: str) -> Result[RespWorkerInfo, dict]:
     endpoint = f"{server_url}/worker/{worker_id}"
     headers = {"Accept": "application/json"}
 
@@ -248,8 +248,8 @@ def get_worker_info(server_url, worker_id: str) -> Result[RespWorkerInfo, dict]:
     return Ok(RespWorkerInfo(**response_json))
 
 
-async def get_worker_info_async(
-    server_url,
+async def info_async(
+    server_url: str,
     worker_id: str,
 ) -> Result[RespWorkerInfo, dict]:
     endpoint = f"{server_url}/worker/{worker_id}"

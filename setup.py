@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="pymec_client",
+    name="pymec",
     version="0.0.1",
     description="Python client for MECRM API",
     author="jme-rs",

@@ -22,8 +22,11 @@ class MECObject(object):
             raise ValueError("id is not set")
         return self._id
 
-    def info(self) -> Any:
+    def remote_info(self) -> Any:
         raise NotImplementedError()
 
+    async def remote_info_async(self) -> Any:
+        raise NotImplementedError()
+    
     def has_remote(self) -> bool:
         return self._id is not None
