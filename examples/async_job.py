@@ -16,7 +16,7 @@ async def main():
 
 
 async def worker():
-    from pymec_client.mec_worker import AsyncMECWorker
+    from pymec.mec_worker import AsyncMECWorker
 
     server_url = "https://mecrm.dolylab.cc/api/v0.5"
 
@@ -51,7 +51,7 @@ async def worker():
 
 
 async def requester():
-    from pymec_client.mec_requester import AsyncMECRequester
+    from pymec.mec_requester import AsyncMECRequester
 
     # Wait for the worker to start
     await asyncio.sleep(1)
@@ -81,7 +81,7 @@ async def requester():
 
 
 async def get_lambda_id(server_url: str, runtime: str) -> str:
-    from pymec_client.mec_developer import AsyncMECDeveloper
+    from pymec.mec_developer import AsyncMECDeveloper
 
     # Create a developer
     developer = AsyncMECDeveloper(server_url)

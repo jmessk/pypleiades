@@ -5,7 +5,7 @@ import logging
 import io
 from result import Result, Ok, Err
 
-from api_types import Code
+from .api_types import Code
 
 
 ###############################################################
@@ -78,7 +78,6 @@ class RespDataCreate:
 
     code: int
     status: str
-    message: str
     data_id: str = field(alias="id")
     checksum: str
 
@@ -103,7 +102,7 @@ def post_data(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespDataCreate(**response_json))
@@ -129,7 +128,7 @@ async def post_data_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespDataCreate(**response_json))
@@ -174,7 +173,7 @@ def info(server_url: str, data_id: str) -> Result[RespDataInfo, dict]:
     response_json = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespDataInfo(**response_json))
@@ -193,7 +192,7 @@ async def info_async(server_url: str, data_id: str) -> Result[RespDataInfo, dict
     response_json = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespDataInfo(**response_json))

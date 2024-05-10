@@ -1,7 +1,7 @@
-from pymec_client.mec_developer import MECDeveloper
-from pymec_client.mec_requester import MECRequester
+from pymec.mec_developer import MECDeveloper
+from pymec.mec_requester import MECRequester
 
-from pymec_client.api import MECAPI
+from pymec.api import MECAPI
 
 
 SERVER_URL = "http://192.168.168.127:8332/api/v0.5"

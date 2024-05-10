@@ -6,5 +6,5 @@ setup(
     description="Python client for MECRM API",
     author="jme-rs",
     install_requires=["httpx", "attrs", "result"],
-    packages=["pymec_client"],
+    packages=["pymec"],
 )

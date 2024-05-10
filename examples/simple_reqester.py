@@ -1,5 +1,5 @@
-from pymec_client.mec_requester import MECRequester
-from pymec_client.mec_developer import MECDeveloper
+from pymec.mec_requester import MECRequester
+from pymec.mec_developer import MECDeveloper
 import time
 import logging
 

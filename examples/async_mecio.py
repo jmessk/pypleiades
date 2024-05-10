@@ -1,6 +1,6 @@
 import asyncio
 import time
-from pymec_client.mec_io import MECIO, AsyncMECIO
+from pymec.mec_io import MECIO, AsyncMECIO
 
 
 SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5"

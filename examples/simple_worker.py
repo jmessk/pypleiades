@@ -1,4 +1,4 @@
-from pymec_client.mec_worker import MECWorker
+from pymec.mec_worker import MECWorker
 import logging
 
 

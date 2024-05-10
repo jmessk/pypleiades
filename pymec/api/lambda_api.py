@@ -3,7 +3,7 @@ import httpx
 import logging
 from result import Result, Ok, Err
 
-from api_types import Code
+from .api_types import Code
 
 
 ###############################################################
@@ -70,7 +70,7 @@ def create(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespLambdaCreate(**response_json))
@@ -97,7 +97,7 @@ async def create_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespLambdaCreate(**response_json))
@@ -143,7 +143,7 @@ def info(server_url: str, lambda_id: str) -> Result[RespLambdaInfo, dict]:
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespLambdaInfo(**response_json))
@@ -164,7 +164,7 @@ async def info_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespLambdaInfo(**response_json))

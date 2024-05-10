@@ -3,7 +3,7 @@ import httpx
 import logging
 from result import Result, Ok, Err
 
-from api_types import Code
+from .api_types import Code
 
 
 ###############################################################
@@ -79,7 +79,7 @@ def create_job(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespJobCreate(**response_json))
@@ -110,7 +110,7 @@ async def create_job_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespJobCreate(**response_json))
@@ -197,7 +197,7 @@ def info(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
     response_json = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespJobInfo.from_dict(response_json))
@@ -216,7 +216,7 @@ async def info_async(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
     response_json = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespJobInfo.from_dict(response_json))
@@ -294,7 +294,7 @@ def update_status(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespJobUpdate(**response_json))
@@ -325,7 +325,7 @@ async def update_status_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespJobUpdate(**response_json))

@@ -1,4 +1,4 @@
-from pymec_client.mec_developer import MECDeveloper, AsyncMECDeveloper
+from pymec.mec_developer import MECDeveloper, AsyncMECDeveloper
 
 
 # Sync version

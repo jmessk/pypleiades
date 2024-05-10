@@ -3,7 +3,7 @@ import httpx
 import logging
 from result import Result, Ok, Err
 
-from api_types import Code
+from .api_types import Code
 
 
 ###############################################################
@@ -64,7 +64,7 @@ def register(server_url: str, runtimes: list[str]) -> Result[RespWorkerRegist, d
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespWorkerRegist(**response_json))
@@ -88,7 +88,7 @@ async def register_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespWorkerRegist(**response_json))
@@ -167,7 +167,7 @@ def contract(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespWorkerContract(**response_json))
@@ -198,7 +198,7 @@ async def contract_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespWorkerContract(**response_json))
@@ -242,7 +242,7 @@ def info(server_url: str, worker_id: str) -> Result[RespWorkerInfo, dict]:
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespWorkerInfo(**response_json))
@@ -264,7 +264,7 @@ async def info_async(
     response_json: dict[str, str] = response.json()
     logging.debug(response_json)
 
-    if response_json.get("code") != Code.OK:
+    if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
     return Ok(RespWorkerInfo(**response_json))

@@ -7,7 +7,7 @@ from dataclasses import asdict
 from api import (
     error,
 )
-from pymec_client.api import data_api, job_api, kv_api, lambda_api, worker_api
+from pymec.api import data_api, job_api, kv_api, lambda_api, worker_api
 
 
 class MECContentType(Enum):
