@@ -1,0 +1,5 @@
+Metadata-Version: 2.1
+Name: pymec
+Version: 0.0.1
+Summary: Python client for MECRM API
+Author: jme-rs

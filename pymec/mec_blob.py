@@ -124,7 +124,7 @@ class MECBlob(MECObject):
             self._logger.error(result.unwrap_err())
             raise MECBlobException("Failed to upload data")
 
-        self._id = result.unwrap().data_id
+        self._id = result.unwrap().id
         self._logger.info(f"Uploaded data to {self._id}")
 
         return self
@@ -142,7 +142,7 @@ class MECBlob(MECObject):
             self._logger.error(result.unwrap_err())
             raise MECBlobException("Failed to upload data")
 
-        self._id = result.unwrap().data_id
+        self._id = result.unwrap().id
         self._logger.info(f"Uploaded data to {self._id}")
 
         return self

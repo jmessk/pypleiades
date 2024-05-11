@@ -14,6 +14,16 @@ ENV LANG en_US.UTF-8
 
 # =============================================================
 
+# install packages
+
+
+RUN pip3 install --upgrade pip && \
+    pip3 install \
+    pytest \
+    pytest-asyncio
+
+# =============================================================
+
 # add user
 
 

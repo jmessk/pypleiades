@@ -1,4 +1,4 @@
-from attrs import define, field
+from attrs import define, field, converters
 import httpx
 import logging
 from result import Result, Ok, Err
@@ -50,11 +50,10 @@ class RespJobCreate:
 
     code: int
     status: str
-    message: str
     job_id: str = field(alias="id")
 
 
-def create_job(
+def create(
     server_url: str,
     lambda_id: str,
     data_id: str,
@@ -76,7 +75,7 @@ def create_job(
             json=request_json,
         )
 
-    response_json: dict[str, str] = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):
@@ -85,7 +84,7 @@ def create_job(
     return Ok(RespJobCreate(**response_json))
 
 
-async def create_job_async(
+async def create_async(
     server_url: str,
     lambda_id: str,
     data_id: str,
@@ -107,7 +106,7 @@ async def create_job_async(
             json=request_json,
         )
 
-    response_json: dict[str, str] = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):
@@ -135,6 +134,16 @@ class Lambda:
 
 
 @define(slots=True, frozen=True)
+class InputData:
+    data_id: str = field(alias="id")
+
+
+@define(slots=True, frozen=True)
+class OutputData:
+    data_id: str = field(alias="id")
+
+
+@define(slots=True, frozen=True, kw_only=True)
 class RespJobInfo:
     """Get job metadata
     method: `GET`
@@ -161,26 +170,33 @@ class RespJobInfo:
 
     code: int
     status: str
-    job_id: str = field(alias="id")
+    job_id: str
     job_status: str
-    input_data_id: str = field(alias="job_input_id")
-    output_data_id: str = field(alias="job_output_id")
-    lambda_id: str = field(alias="functio")
-    lambda_: Lambda = field(alias="lambda")
-    state: str
+    lambda_: Lambda
+    input: InputData
+    output = field(converter=converters.optional(OutputData))
+    # tags: list[str]
+    # transactions: list[str]
 
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
+    @staticmethod
+    def from_dict(data: dict):
+        if data.get("output"):
+            output_data = OutputData(**data["output"])
+        else:
+            output_data = None
+
+        return RespJobInfo(
             code=data["code"],
             status=data["status"],
             job_id=data["id"],
-            job_status=data["job_status"],
-            input_data_id=data["job_input_id"],
-            output_data_id=data["job_output_id"],
-            lambda_id=data["functio"],
+            job_status=data["state"],
+            #
             lambda_=Lambda(**data["lambda"]),
-            state=data["state"],
+            input=InputData(**data["input"]),
+            output=output_data,
+            #
+            # tags=data["tags"],
+            # transactions=data["transactions"],
         )
 
 
@@ -194,8 +210,9 @@ def info(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
             headers=headers,
         )
 
-    response_json = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
+    print(response_json)
 
     if response_json.get("code") != int(Code.OK):
         return Err(response_json)
@@ -213,7 +230,7 @@ async def info_async(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
             headers=headers,
         )
 
-    response_json = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):
@@ -239,13 +256,13 @@ class ReqJobUpdate:
     }
     """
 
-    output_data_id: str
+    data_id: str
     status: str
     job_status: str
 
     def to_dict(self):
         return {
-            "output": self.output_data_id,
+            "output": self.data_id,
             "status": self.status,
             "state": self.job_status,
         }
@@ -269,7 +286,7 @@ class RespJobUpdate:
     message: str
 
 
-def update_status(
+def update(
     server_url: str,
     job_id: str,
     output_data_id: str,
@@ -279,7 +296,7 @@ def update_status(
     headers = {"Accept": "application/json"}
 
     request_json = ReqJobUpdate(
-        output_data_id=output_data_id,
+        data_id=output_data_id,
         status=status,
         job_status=status,
     ).to_dict()
@@ -291,7 +308,7 @@ def update_status(
             json=request_json,
         )
 
-    response_json: dict[str, str] = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):
@@ -300,7 +317,7 @@ def update_status(
     return Ok(RespJobUpdate(**response_json))
 
 
-async def update_status_async(
+async def update_async(
     server_url: str,
     job_id: str,
     output_data_id: str,
@@ -310,7 +327,7 @@ async def update_status_async(
     headers = {"Accept": "application/json"}
 
     request_json = ReqJobUpdate(
-        output_data_id=output_data_id,
+        data_id=output_data_id,
         status=status,
         job_status=status,
     ).to_dict()
@@ -322,7 +339,7 @@ async def update_status_async(
             json=request_json,
         )
 
-    response_json: dict[str, str] = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):

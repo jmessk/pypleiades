@@ -24,7 +24,7 @@ def get_data(server_url: str, data_id: str) -> Result[bytes, dict]:
     # If the response is JSON, return the JSON object
     # `response.headers` returns a `CaseInsensitiveDict`
     if response.headers.get("content-type") == "application/json":
-        response_json: dict[str, str] = response.json()
+        response_json: dict = response.json()
         logging.debug(response_json)
 
         return Err(response_json)
@@ -47,7 +47,7 @@ async def get_data_async(server_url: str, data_id: str) -> Result[bytes, dict]:
     # If the response is JSON, return the JSON object
     # `response.headers` returns a `CaseInsensitiveDict`
     if response.headers.get("content-type") == "application/json":
-        response_json: dict[str, str] = response.json()
+        response_json: dict = response.json()
         logging.debug(response_json)
 
         return Err(response_json)
@@ -85,12 +85,11 @@ class RespDataCreate:
 def post_data(
     server_url: str,
     data_bytes: bytes,
-    file_name: str = "input",
 ) -> Result[RespDataCreate, dict]:
     endpoint = f"{server_url}/data"
     headers = {"Accept": "application/json"}
 
-    file = {"file": (file_name, io.BytesIO(data_bytes))}
+    file = {"file": ("input", io.BytesIO(data_bytes))}
 
     with httpx.Client() as client:
         response = client.post(
@@ -99,7 +98,7 @@ def post_data(
             files=file,
         )
 
-    response_json: dict[str, str] = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):
@@ -125,7 +124,7 @@ async def post_data_async(
             files=file,
         )
 
-    response_json: dict[str, str] = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):
@@ -155,7 +154,6 @@ class RespDataInfo:
 
     code: int
     status: str
-    message: str
     data_id: str = field(alias="id")
     checksum: str
 
@@ -170,7 +168,7 @@ def info(server_url: str, data_id: str) -> Result[RespDataInfo, dict]:
             headers=headers,
         )
 
-    response_json = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):
@@ -189,7 +187,7 @@ async def info_async(server_url: str, data_id: str) -> Result[RespDataInfo, dict
             headers=headers,
         )
 
-    response_json = response.json()
+    response_json: dict = response.json()
     logging.debug(response_json)
 
     if response_json.get("code") != int(Code.OK):

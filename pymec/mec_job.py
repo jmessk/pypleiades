@@ -127,7 +127,7 @@ class MECJob(MECObject):
         if not self._lambda.has_remote():
             self._lambda.upload()
 
-        result = job_api.create_job(
+        result = job_api.create(
             self._server_url,
             self._lambda.id,
             self._input.id,
@@ -158,7 +158,7 @@ class MECJob(MECObject):
         if not self._lambda.has_remote():
             await self._lambda.upload_async()
 
-        result = await job_api.create_job_async(
+        result = await job_api.create_async(
             self._server_url,
             self._lambda.id,
             self._input.id,
@@ -242,7 +242,7 @@ class MECJob(MECObject):
         if not blob.has_remote():
             blob.upload()
 
-        result = job_api.update_status(self._server_url, self._id, blob.id, "finished")
+        result = job_api.update(self._server_url, self._id, blob.id, "finished")
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -257,7 +257,7 @@ class MECJob(MECObject):
         if not blob.has_remote():
             await blob.upload_async()
 
-        result = await job_api.update_status_async(
+        result = await job_api.update_async(
             self._server_url,
             self._id,
             blob.id,
