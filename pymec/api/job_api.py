@@ -3,6 +3,9 @@ import httpx
 import logging
 from result import Result, Ok, Err
 
+from pydantic import BaseModel, Field
+from typing import Optional
+
 from .api_types import Code
 
 
@@ -118,86 +121,111 @@ async def create_async(
 ###############################################################
 
 
-@define(slots=True, frozen=True)
-class Lambda:
-    """
-    type respJobLambda struct {
-        Id      int64  `json:"id,string"`
-        Runtime string `json:"runtime"`
-        Code    int    `json:"codex"`
-    }
-    """
+# @define(slots=True, frozen=True)
+# class Lambda:
+#     """
+#     type respJobLambda struct {
+#         Id      int64  `json:"id,string"`
+#         Runtime string `json:"runtime"`
+#         Code    int    `json:"codex"`
+#     }
+#     """
 
-    lambda_id: str = field(alias="id")
+#     lambda_id: str = field(alias="id")
+#     runtime: str
+#     data_id: str = field(alias="codex")
+
+
+class Lambda(BaseModel):
+    lambda_id: str = Field(alias="id")
     runtime: str
-    data_id: str = field(alias="codex")
+    data_id: str = Field(alias="codex")
 
 
-@define(slots=True, frozen=True)
-class InputData:
-    data_id: str = field(alias="id")
+# @define(slots=True, frozen=True)
+# class InputData:
+#     data_id: str = field(alias="id")
 
 
-@define(slots=True, frozen=True)
-class OutputData:
-    data_id: str = field(alias="id")
+class InputData(BaseModel):
+    data_id: str = Field(alias="id")
 
 
-@define(slots=True, frozen=True, kw_only=True)
-class RespJobInfo:
-    """Get job metadata
-    method: `GET`
-    endpoint: `/job/{job_id}`
+# @define(slots=True, frozen=True)
+# class OutputData:
+#     data_id: str = field(alias="id")
 
-    type respMsgJobInfo struct {
-        Code              int    `json:"code"`
-        Status            string `json:"status"`
-        Message           string `json:"message,omitempty"`
-        JobId             int64  `json:"id,string,omitempty"`
-        JobStatus         string `json:"job_status,omitempty"`
-        JobInputData      *int64 `json:"job_input_id,string"`
-        JobOutputData     *int64 `json:"job_output_id,string"`
-        JobFunctio        int64  `json:"functio,string,omitempty"`
-        JobFunctioRuntime string `json:"runtime,omitempty"`
-        // New Format
-        Tags   []string      `json:"tags,omitempty"`
-        Lambda respJobLambda `json:"lambda"`
-        Input  *respJobData  `json:"input,omitempty"`
-        Output *respJobData  `json:"output,omitempty"`
-        State  string        `json:"state,omitempty"`
-    }
-    """
 
+class OutputData(BaseModel):
+    data_id: str = Field(alias="id")
+
+
+# @define(slots=True, frozen=True, kw_only=True)
+# class RespJobInfo:
+#     """Get job metadata
+#     method: `GET`
+#     endpoint: `/job/{job_id}`
+
+#     type respMsgJobInfo struct {
+#         Code              int    `json:"code"`
+#         Status            string `json:"status"`
+#         Message           string `json:"message,omitempty"`
+#         JobId             int64  `json:"id,string,omitempty"`
+#         JobStatus         string `json:"job_status,omitempty"`
+#         JobInputData      *int64 `json:"job_input_id,string"`
+#         JobOutputData     *int64 `json:"job_output_id,string"`
+#         JobFunctio        int64  `json:"functio,string,omitempty"`
+#         JobFunctioRuntime string `json:"runtime,omitempty"`
+#         // New Format
+#         Tags   []string      `json:"tags,omitempty"`
+#         Lambda respJobLambda `json:"lambda"`
+#         Input  *respJobData  `json:"input,omitempty"`
+#         Output *respJobData  `json:"output,omitempty"`
+#         State  string        `json:"state,omitempty"`
+#     }
+#     """
+
+#     code: int
+#     status: str
+#     job_id: str
+#     job_status: str
+#     lambda_: Lambda
+#     input: InputData
+#     output = field(converter=converters.optional(OutputData))
+#     # tags: list[str]
+#     # transactions: list[str]
+
+#     @staticmethod
+#     def from_dict(data: dict):
+#         if data.get("output"):
+#             output_data = OutputData(**data["output"])
+#         else:
+#             output_data = None
+
+#         return RespJobInfo(
+#             code=data["code"],
+#             status=data["status"],
+#             job_id=data["id"],
+#             job_status=data["state"],
+#             #
+#             lambda_=Lambda(**data["lambda"]),
+#             input=InputData(**data["input"]),
+#             output=output_data,
+#             #
+#             # tags=data["tags"],
+#             # transactions=data["transactions"],
+#         )
+
+
+class RespJobInfo(BaseModel):
     code: int
     status: str
-    job_id: str
-    job_status: str
-    lambda_: Lambda
+    job_id: str = Field(alias="id")
+    job_status: str = Field(alias="state")
+    lambda_: Lambda = Field(alias="lambda")
     input: InputData
-    output = field(converter=converters.optional(OutputData))
-    # tags: list[str]
-    # transactions: list[str]
-
-    @staticmethod
-    def from_dict(data: dict):
-        if data.get("output"):
-            output_data = OutputData(**data["output"])
-        else:
-            output_data = None
-
-        return RespJobInfo(
-            code=data["code"],
-            status=data["status"],
-            job_id=data["id"],
-            job_status=data["state"],
-            #
-            lambda_=Lambda(**data["lambda"]),
-            input=InputData(**data["input"]),
-            output=output_data,
-            #
-            # tags=data["tags"],
-            # transactions=data["transactions"],
-        )
+    output: Optional[OutputData] = Field(default=None)
+    tags: list[str]
 
 
 def info(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
@@ -217,7 +245,7 @@ def info(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
     if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
-    return Ok(RespJobInfo.from_dict(response_json))
+    return Ok(RespJobInfo(**response_json))
 
 
 async def info_async(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
@@ -236,7 +264,7 @@ async def info_async(server_url: str, job_id: str) -> Result[RespJobInfo, dict]:
     if response_json.get("code") != int(Code.OK):
         return Err(response_json)
 
-    return Ok(RespJobInfo.from_dict(response_json))
+    return Ok(RespJobInfo(**response_json))
 
 
 ###############################################################
