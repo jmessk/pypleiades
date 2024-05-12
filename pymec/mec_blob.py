@@ -21,6 +21,16 @@ class MECBlob(MECObject):
         id: Optional[str] = None,
         logger: Optional[logging.Logger] = None,
     ):
+    """MECBlob
+
+    Class for handling Blob
+
+    Args:
+        server_url (str): Specify the MECRM URL to use
+        id (Optional[str]): Data ID on MECRM
+        logger (Optional[logging.Logger]): logging object
+    """
+
         super().__init__(
             server_url=server_url,
             id=id,
@@ -33,6 +43,14 @@ class MECBlob(MECObject):
 
     @property
     def data(self) -> bytes:
+        """data
+
+        If data is empty, throws an exception.
+
+        Returns:
+            bytes: Blob data bytes
+        """
+
         if self._data is None:
             raise ValueError("data is not set")
         return self._data
@@ -40,6 +58,7 @@ class MECBlob(MECObject):
     # info
 
     def remote_info(self) -> data_api.RespDataInfo:
+        """remote_info
         if not self.has_remote():
             raise MECBlobException("No data to get info")
 
