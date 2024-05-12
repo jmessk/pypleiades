@@ -43,7 +43,6 @@ class RespWorkerRegist:
 
     code: int
     status: str
-    message: str
     worker_id: str = field(alias="id")
     runtimes: list[str] = field(alias="runtime")
 
@@ -138,8 +137,7 @@ class RespWorkerContract:
 
     code: int
     status: str
-    message: str
-    job_id: str = field(alias="id")
+    job_id: str = field(alias="job")
 
 
 def contract(
@@ -224,7 +222,6 @@ class RespWorkerInfo:
 
     code: int
     status: str
-    message: str
     worker_id: str = field(alias="id")
     runtimes: list[str] = field(alias="runtime")
 
