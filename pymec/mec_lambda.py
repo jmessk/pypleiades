@@ -1,6 +1,7 @@
 from typing import Optional
 from typing_extensions import Self
 import logging
+import httpx
 
 from .api import lambda_api
 from .mec_object import MECObject
@@ -28,11 +29,12 @@ class MECLambda(MECObject):
         )
 
         self._blob: Optional[MECBlob] = None
+        self._runtime: Optional[str] = None
 
     # properties
 
     @property
-    def _blob(self) -> MECBlob:
+    def blob(self) -> MECBlob:
         if self._blob is None:
             raise ValueError("blob is not set")
         return self._blob

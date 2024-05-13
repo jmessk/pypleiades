@@ -1,60 +1,11 @@
 from attrs import define, field
-from enum import Enum, auto
-import httpx
 import logging
 import io
 from result import Result, Ok, Err
+from typing import Optional
 
+from . import MECAPI
 from .api_types import Code
-
-
-###############################################################
-
-
-def get_data(server_url: str, data_id: str) -> Result[bytes, dict]:
-    endpoint = f"{server_url}/data/{data_id}/blob"
-    headers = {"Accept": "application/octet-stream"}
-
-    with httpx.Client() as client:
-        response = client.get(
-            endpoint,
-            headers=headers,
-        )
-
-    # If the response is JSON, return the JSON object
-    # `response.headers` returns a `CaseInsensitiveDict`
-    if response.headers.get("content-type") == "application/json":
-        response_json: dict = response.json()
-        logging.debug(response_json)
-
-        return Err(response_json)
-
-    logging.debug("content-type: application/octet-stream")
-
-    return Ok(response.content)
-
-
-async def get_data_async(server_url: str, data_id: str) -> Result[bytes, dict]:
-    endpoint = f"{server_url}/data/{data_id}/blob"
-    headers = {"Accept": "application/octet-stream"}
-
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            endpoint,
-            headers=headers,
-        )
-
-    # If the response is JSON, return the JSON object
-    # `response.headers` returns a `CaseInsensitiveDict`
-    if response.headers.get("content-type") == "application/json":
-        response_json: dict = response.json()
-        logging.debug(response_json)
-
-        return Err(response_json)
-
-    logging.debug("content-type: application/octet-stream")
-
-    return Ok(response.content)
 
 
 ###############################################################
@@ -82,57 +33,6 @@ class RespDataCreate:
     checksum: str
 
 
-def post_data(
-    server_url: str,
-    data_bytes: bytes,
-) -> Result[RespDataCreate, dict]:
-    endpoint = f"{server_url}/data"
-    headers = {"Accept": "application/json"}
-
-    file = {"file": ("input", io.BytesIO(data_bytes))}
-
-    with httpx.Client() as client:
-        response = client.post(
-            endpoint,
-            headers=headers,
-            files=file,
-        )
-
-    response_json: dict = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespDataCreate(**response_json))
-
-
-async def post_data_async(
-    server_url: str,
-    data_bytes: bytes,
-    file_name: str = "input",
-) -> Result[RespDataCreate, dict]:
-    endpoint = f"{server_url}/data"
-    headers = {"Accept": "application/json"}
-
-    file = {"file": (file_name, io.BytesIO(data_bytes))}
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            endpoint,
-            headers=headers,
-            files=file,
-        )
-
-    response_json: dict = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespDataCreate(**response_json))
-
-
 ###############################################################
 
 
@@ -158,39 +58,116 @@ class RespDataInfo:
     checksum: str
 
 
-def info(server_url: str, data_id: str) -> Result[RespDataInfo, dict]:
-    endpoint = f"{server_url}/data/{data_id}"
-    headers = {"Accept": "application/json"}
-
-    with httpx.Client() as client:
-        response = client.get(
-            endpoint,
-            headers=headers,
-        )
-
-    response_json: dict = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespDataInfo(**response_json))
+###############################################################
 
 
-async def info_async(server_url: str, data_id: str) -> Result[RespDataInfo, dict]:
-    endpoint = f"{server_url}/data/{data_id}"
-    headers = {"Accept": "application/json"}
+class DataAPI(MECAPI):
+    def __init__(
+        self,
+        server_url: str,
+        logger: Optional[logging.Logger] = None,
+        httpx_config: Optional[dict] = None,
+    ):
+        super().__init__(server_url, logger, httpx_config)
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            endpoint,
-            headers=headers,
-        )
+    # get data
 
-    response_json: dict = response.json()
-    logging.debug(response_json)
+    def get_data(self, data_id: str) -> Result[bytes, dict]:
+        endpoint = f"{self._server_url}/data/{data_id}/blob"
 
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
+        response = self._client.get(endpoint)
 
-    return Ok(RespDataInfo(**response_json))
+        # If the response is JSON, return the JSON object
+        # `response.headers` returns a `CaseInsensitiveDict`
+        if response.headers.get("content-type") == "application/json":
+            response_json: dict = response.json()
+            self._logger.debug(response_json)
+
+            return Err(response_json)
+
+        self._logger.debug("content-type: application/octet-stream")
+
+        return Ok(response.content)
+
+    async def get_data_async(self, data_id: str) -> Result[bytes, dict]:
+        endpoint = f"{self._server_url}/data/{data_id}/blob"
+
+        response = await self._client_async.get(endpoint)
+
+        # If the response is JSON, return the JSON object
+        # `response.headers` returns a `CaseInsensitiveDict`
+        if response.headers.get("content-type") == "application/json":
+            response_json: dict = response.json()
+            self._logger.debug(response_json)
+
+            return Err(response_json)
+
+        self._logger.debug("content-type: application/octet-stream")
+
+        return Ok(response.content)
+
+    # post data
+
+    def post_data(
+        self,
+        data_bytes: bytes,
+    ) -> Result[RespDataCreate, dict]:
+        endpoint = f"{self._server_url}/data"
+
+        file = {"file": ("input", io.BytesIO(data_bytes))}
+
+        response = self._client.post(endpoint, files=file)
+
+        response_json: dict = response.json()
+        self._logger.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespDataCreate(**response_json))
+
+    async def post_data_async(
+        self,
+        data_bytes: bytes,
+    ) -> Result[RespDataCreate, dict]:
+        endpoint = f"{self._server_url}/data"
+
+        file = {"file": ("input", io.BytesIO(data_bytes))}
+
+        response = await self._client_async.post(endpoint, files=file)
+
+        response_json: dict = response.json()
+        self._logger.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespDataCreate(**response_json))
+
+    # info
+
+    def info(self, data_id: str) -> Result[RespDataInfo, dict]:
+        endpoint = f"{self._server_url}/data/{data_id}"
+
+        response = self._client.get(endpoint)
+
+        response_json: dict = response.json()
+        self._logger.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespDataInfo(**response_json))
+
+    async def info_async(self, data_id: str) -> Result[RespDataInfo, dict]:
+        endpoint = f"{self._server_url}/data/{data_id}"
+
+        response = await self._client_async.get(endpoint)
+
+        response_json: dict = response.json()
+        self._logger.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespDataInfo(**response_json))

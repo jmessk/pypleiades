@@ -1,6 +1,9 @@
 from typing import Optional
 from typing_extensions import Self
 import logging
+import time
+import asyncio
+import httpx
 
 from .api import job_api
 from .mec_object import MECObject
@@ -9,7 +12,15 @@ from .mec_lambda import MECLambda
 
 
 class MECJob(MECObject):
-    __slots__ = ["_server_url", "_id", "_logger", "_input", "_lambda", "_tags"]
+    __slots__ = [
+        "_server_url",
+        "_id",
+        "_logger",
+        "_input_blob",
+        "_output_blob",
+        "_lambda",
+        "_tags",
+    ]
 
     def __init__(
         self,
@@ -23,17 +34,24 @@ class MECJob(MECObject):
             logger=logger,
         )
 
-        self._input: Optional[MECBlob] = None
+        self._input_blob: Optional[MECBlob] = None
+        self._output_blob: Optional[MECBlob] = None
         self._lambda: Optional[MECLambda] = None
         self._tags: list[str] = []
 
     # properties
 
     @property
-    def input(self) -> MECBlob:
-        if self._input is None:
+    def input_blob(self) -> MECBlob:
+        if self._input_blob is None:
             raise ValueError("input is not set")
-        return self._input
+        return self._input_blob
+
+    @property
+    def output_blob(self) -> MECBlob:
+        if self._output_blob is None:
+            raise ValueError("output is not set")
+        return self._output_blob
 
     @property
     def lambda_(self) -> MECLambda:
@@ -46,6 +64,35 @@ class MECJob(MECObject):
         if self._tags is None:
             raise ValueError("tags is not set")
         return self._tags
+
+    # get
+
+    def input_bytes(self) -> bytes:
+        if not self.has_remote():
+            raise Exception()
+
+        if self._input_blob is None:
+            raise Exception()
+
+        return self.input_blob.data
+
+    def lambda_bytes(self) -> bytes:
+        if not self.has_remote():
+            raise Exception()
+
+        if self._lambda is None:
+            raise Exception()
+
+        return self.lambda_.blob.data
+    
+    def output_bytes(self) -> bytes:
+        if not self.has_remote():
+            raise Exception()
+
+        if self._output_blob is None:
+            raise Exception()
+
+        return self.output_blob.data
 
     # info
 
@@ -79,10 +126,10 @@ class MECJob(MECObject):
         if self.has_remote():
             raise Exception()
 
-        if self._input is not None:
+        if self._input_blob is not None:
             raise Exception()
 
-        self._input = blob
+        self._input_blob = blob
 
         return self
 
@@ -115,14 +162,14 @@ class MECJob(MECObject):
         if self.has_remote():
             raise Exception()
 
-        if self._input is None:
+        if self._input_blob is None:
             raise ValueError("input is not set")
 
         if self._lambda is None:
             raise ValueError("lambda is not set")
 
-        if not self._input.has_remote():
-            self._input.upload()
+        if not self._input_blob.has_remote():
+            self._input_blob.upload()
 
         if not self._lambda.has_remote():
             self._lambda.upload()
@@ -130,7 +177,7 @@ class MECJob(MECObject):
         result = job_api.create(
             self._server_url,
             self._lambda.id,
-            self._input.id,
+            self._input_blob.id,
             self._tags,
         )
 
@@ -146,14 +193,14 @@ class MECJob(MECObject):
         if self.has_remote():
             raise Exception()
 
-        if self._input is None:
+        if self._input_blob is None:
             raise ValueError("input is not set")
 
         if self._lambda is None:
             raise ValueError("lambda is not set")
 
-        if not self._input.has_remote():
-            await self._input.upload_async()
+        if not self._input_blob.has_remote():
+            await self._input_blob.upload_async()
 
         if not self._lambda.has_remote():
             await self._lambda.upload_async()
@@ -161,7 +208,7 @@ class MECJob(MECObject):
         result = await job_api.create_async(
             self._server_url,
             self._lambda.id,
-            self._input.id,
+            self._input_blob.id,
             self._tags,
         )
 
@@ -185,19 +232,51 @@ class MECJob(MECObject):
             self._logger.error(result.unwrap_err())
             raise Exception()
 
-        return result.unwrap().state == "Finished"
+        if result.unwrap().job_status != "Finished":
+            return False
+
+        output_data_id = result.unwrap().output.data_id
+        self._output_blob = MECBlob(
+            self._server_url,
+            output_data_id,
+            self._logger,
+        ).download()
+
+        return True
 
     async def is_finished_async(self) -> bool:
         if not self.has_remote():
             raise Exception()
 
-        result = await job_api.info_async(self._server_url, self._id)
+        result_info = await job_api.info_async(self._server_url, self._id)
 
-        if result.is_err():
-            self._logger.error(result.unwrap_err())
+        if result_info.is_err():
+            self._logger.error(result_info.unwrap_err())
             raise Exception()
 
-        return result.unwrap().state == "Finished"
+        if result_info.unwrap().job_status != "Finished":
+            return False
+
+        output_data_id = result_info.unwrap().output.data_id
+        self._output_blob = await MECBlob(
+            self._server_url,
+            output_data_id,
+            self._logger,
+        ).download_async()
+
+    # wait for finish
+
+    def wait_for_finish(self, sleep_s=0.0) -> Self:
+        while not self.is_finished():
+            time.sleep(sleep_s)
+
+        return self
+
+    async def wait_for_finish_async(self, sleep_s=0.0) -> Self:
+        while not await self.is_finished_async():
+            await asyncio.sleep(sleep_s)
+
+        return self
 
     # download
 
@@ -207,12 +286,12 @@ class MECJob(MECObject):
 
         info = self.remote_info()
 
-        self._input = MECBlob(
-            self._server_url, info.input_data_id, self._logger
+        self._input_blob = MECBlob(
+            self._server_url, info.input.data_id, self._logger
         ).download()
 
         self._lambda = MECLambda(
-            self._server_url, info.lambda_id, self._logger
+            self._server_url, info.lambda_.lambda_id, self._logger
         ).download()
 
         return self
@@ -223,12 +302,12 @@ class MECJob(MECObject):
 
         info = await self.remote_info_async()
 
-        self._input = await MECBlob(
-            self._server_url, info.input_data_id, self._logger
+        self._input_blob = await MECBlob(
+            self._server_url, info.input.data_id, self._logger
         ).download_async()
 
         self._lambda = await MECLambda(
-            self._server_url, info.lambda_id, self._logger
+            self._server_url, info.lambda_.lambda_id, self._logger
         ).download_async()
 
         return self

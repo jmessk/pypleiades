@@ -1,9 +1,6 @@
 import pytest
-import logging.config
-import logging
 
-from pymec.api import data_api
-from pymec.api import lambda_api
+from pymec.api import data_api, lambda_api
 
 
 SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"

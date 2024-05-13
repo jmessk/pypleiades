@@ -1,6 +1,7 @@
 from typing import Optional
 from typing_extensions import Self
 import logging
+import httpx
 
 from .api import worker_api
 from .mec_object import MECObject
@@ -110,7 +111,7 @@ class MECWorker(MECObject):
 
     # contract
 
-    def contract(self, timeout: int = 20) -> MECJob:
+    def contract(self, timeout: int = 20) -> Optional[MECJob]:
         if not self.has_remote():
             raise Exception()
 
@@ -120,13 +121,18 @@ class MECWorker(MECObject):
             self._logger.error(result.unwrap_err())
             raise Exception()
 
+        response = result.unwrap()
+
+        if response.job_id is None:
+            return None
+
         return MECJob(
             self._server_url,
-            job_id=result.unwrap().job_id,
+            job_id=response.job_id,
             logger=self._logger,
         ).download()
 
-    async def contract_async(self, timeout: int = 20) -> MECJob:
+    async def contract_async(self, timeout: int = 20) -> Optional[MECJob]:
         if not self.has_remote():
             raise Exception()
 
@@ -141,8 +147,25 @@ class MECWorker(MECObject):
             self._logger.error(result.unwrap_err())
             raise Exception()
 
+        response = result.unwrap()
+
+        if response.job_id is None:
+            return None
+
         return await MECJob(
             self._server_url,
-            job_id=result.unwrap().job_id,
+            job_id=response.job_id,
             logger=self._logger,
         ).download_async()
+
+    # wait contract
+
+    def wait_contract(self, timeout: int = 20) -> MECJob:
+        while True:
+            if (job := self.contract(timeout)) is not None:
+                return job
+
+    async def wait_contract_async(self, timeout: int = 20) -> MECJob:
+        while True:
+            if (job := await self.contract_async(timeout)) is not None:
+                return job

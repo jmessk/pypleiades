@@ -1,6 +1,7 @@
 from typing import Optional, Any
 from typing_extensions import Self
 import logging
+import httpx
 
 
 class MECObject(object):

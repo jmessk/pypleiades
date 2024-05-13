@@ -1,8 +1,10 @@
 from attrs import define, field
-import httpx
 import logging
 from result import Result, Ok, Err
+from pydantic import BaseModel, Field
+from typing import Optional
 
+from . import MECAPI
 from .api_types import Code
 
 
@@ -47,52 +49,6 @@ class RespWorkerRegist:
     runtimes: list[str] = field(alias="runtime")
 
 
-def register(server_url: str, runtimes: list[str]) -> Result[RespWorkerRegist, dict]:
-    endpoint = f"{server_url}/worker"
-    headers = {"Accept": "application/json"}
-
-    request_json = ReqWorkerRegist(runtimes=runtimes).to_dict()
-
-    with httpx.Client() as client:
-        response = client.post(
-            endpoint,
-            headers=headers,
-            json=request_json,
-        )
-
-    response_json: dict[str, str] = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespWorkerRegist(**response_json))
-
-
-async def register_async(
-    server_url: str, runtimes: list[str]
-) -> Result[RespWorkerRegist, dict]:
-    endpoint = f"{server_url}/worker"
-    headers = {"Accept": "application/json"}
-
-    request_json = ReqWorkerRegist(runtimes=runtimes).to_dict()
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            endpoint,
-            headers=headers,
-            json=request_json,
-        )
-
-    response_json: dict[str, str] = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespWorkerRegist(**response_json))
-
-
 ###############################################################
 
 
@@ -122,7 +78,7 @@ class ReqWorkerContract:
 
 
 @define(slots=True, frozen=True)
-class RespWorkerContract:
+class RespWorkerContract(BaseModel):
     """Contract a worker
     method: `POST`
     endpoint: `/worker/{worker_id}/contract`
@@ -137,69 +93,7 @@ class RespWorkerContract:
 
     code: int
     status: str
-    job_id: str = field(alias="job")
-
-
-def contract(
-    server_url: str,
-    worker_id: str,
-    tags: list[str],
-    timeout: int,
-) -> Result[RespWorkerContract, dict]:
-    endpoint = f"{server_url}/worker/{worker_id}/contract"
-    headers = {"Accept": "application/json"}
-
-    request_json = ReqWorkerContract(
-        worker_id=worker_id,
-        tags=tags,
-        timeout=timeout,
-    ).to_dict()
-
-    with httpx.Client() as client:
-        response = client.post(
-            endpoint,
-            headers=headers,
-            json=request_json,
-        )
-
-    response_json: dict[str, str] = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespWorkerContract(**response_json))
-
-
-async def contract_async(
-    server_url: str,
-    worker_id: str,
-    tags: list[str],
-    timeout: int,
-) -> Result[RespWorkerContract, dict]:
-    endpoint = f"{server_url}/worker/{worker_id}/contract"
-    headers = {"Accept": "application/json"}
-
-    request_json = ReqWorkerContract(
-        worker_id=worker_id,
-        tags=tags,
-        timeout=timeout,
-    ).to_dict()
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            endpoint,
-            headers=headers,
-            json=request_json,
-        )
-
-    response_json: dict[str, str] = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespWorkerContract(**response_json))
+    job_id: Optional[str] = Field(alias="job", default=None)
 
 
 ###############################################################
@@ -226,42 +120,128 @@ class RespWorkerInfo:
     runtimes: list[str] = field(alias="runtime")
 
 
-def info(server_url: str, worker_id: str) -> Result[RespWorkerInfo, dict]:
-    endpoint = f"{server_url}/worker/{worker_id}"
-    headers = {"Accept": "application/json"}
-
-    with httpx.Client() as client:
-        response = client.get(
-            endpoint,
-            headers=headers,
-        )
-
-    response_json: dict[str, str] = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespWorkerInfo(**response_json))
+###############################################################
 
 
-async def info_async(
-    server_url: str,
-    worker_id: str,
-) -> Result[RespWorkerInfo, dict]:
-    endpoint = f"{server_url}/worker/{worker_id}"
-    headers = {"Accept": "application/json"}
+class WorkerAPI(MECAPI):
+    def __init__(
+        self,
+        server_url: str,
+        logger: Optional[logging.Logger] = None,
+        httpx_config: Optional[dict] = None,
+    ):
+        super().__init__(server_url, logger, httpx_config)
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            endpoint,
-            headers=headers,
-        )
+    # register
 
-    response_json: dict[str, str] = response.json()
-    logging.debug(response_json)
+    def register(self, runtimes: list[str]) -> Result[RespWorkerRegist, dict]:
+        endpoint = f"{self._server_url}/worker"
+        request_json = ReqWorkerRegist(runtimes=runtimes).to_dict()
 
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
+        response = self._client.post(endpoint, json=request_json)
 
-    return Ok(RespWorkerInfo(**response_json))
+        response_json: dict[str, str] = response.json()
+        logging.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespWorkerRegist(**response_json))
+
+    async def register_async(
+        self,
+        runtimes: list[str],
+    ) -> Result[RespWorkerRegist, dict]:
+        endpoint = f"{self._server_url}/worker"
+        request_json = ReqWorkerRegist(runtimes=runtimes).to_dict()
+
+        response = await self._client_async.post(endpoint, json=request_json)
+
+        response_json: dict[str, str] = response.json()
+        logging.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespWorkerRegist(**response_json))
+
+    # contract
+
+    def contract(
+        self,
+        worker_id: str,
+        tags: list[str],
+        timeout: int,
+    ) -> Result[RespWorkerContract, dict]:
+        endpoint = f"{self._server_url}/worker/{worker_id}/contract"
+
+        request_json = ReqWorkerContract(
+            worker_id=worker_id,
+            tags=tags,
+            timeout=timeout,
+        ).to_dict()
+
+        response = self._client.post(endpoint, json=request_json)
+
+        response_json: dict[str, str] = response.json()
+        logging.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespWorkerContract(**response_json))
+
+    async def contract_async(
+        self,
+        worker_id: str,
+        tags: list[str],
+        timeout: int,
+    ) -> Result[RespWorkerContract, dict]:
+        endpoint = f"{self._server_url}/worker/{worker_id}/contract"
+
+        request_json = ReqWorkerContract(
+            worker_id=worker_id,
+            tags=tags,
+            timeout=timeout,
+        ).to_dict()
+
+        response = await self._client_async.post(endpoint, json=request_json)
+
+        response_json: dict[str, str] = response.json()
+        logging.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespWorkerContract(**response_json))
+
+    # info
+
+    def info(self, worker_id: str) -> Result[RespWorkerInfo, dict]:
+        endpoint = f"{self._server_url}/worker/{worker_id}"
+
+        response = self._client.get(endpoint)
+
+        response_json: dict[str, str] = response.json()
+        logging.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespWorkerInfo(**response_json))
+
+    async def info_async(
+        self,
+        worker_id: str,
+    ) -> Result[RespWorkerInfo, dict]:
+        endpoint = f"{self._server_url}/worker/{worker_id}"
+
+        response = await self._client_async.get(endpoint)
+
+        response_json: dict[str, str] = response.json()
+        logging.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespWorkerInfo(**response_json))

@@ -3,6 +3,7 @@ import logging
 
 from .mec_blob import MECBlob
 from .mec_lambda import MECLambda
+from .mec_job import MECJob
 from .mec_worker import MECWorker
 
 
@@ -17,9 +18,12 @@ class MECClient(object):
 
     def new_blob(self) -> MECBlob:
         return MECBlob(self._server_url, logger=self._logger)
-    
+
     def new_lambda(self) -> MECLambda:
         return MECLambda(self._server_url, logger=self._logger)
-    
+
+    def new_job(self) -> MECJob:
+        return MECJob(self._server_url, logger=self._logger)
+
     def new_worker(self) -> MECWorker:
         return MECWorker(self._server_url, logger=self._logger)

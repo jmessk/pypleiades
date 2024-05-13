@@ -2,6 +2,7 @@ from typing import Optional
 from typing_extensions import Self
 import logging
 import aiofiles
+import httpx
 
 from .api import data_api
 from .mec_object import MECObject
@@ -20,17 +21,18 @@ class MECBlob(MECObject):
         server_url: str,
         id: Optional[str] = None,
         logger: Optional[logging.Logger] = None,
+        httpx_config: httpx.
     ):
-    """MECBlob
+        """MECBlob
 
-    Class for handling Blob.
+        Class for handling Blob.
 
-    Args:
-        server_url (str): Specify the MECRM URL to use
-        id (Optional[str]): Data ID on MECRM
-        logger (Optional[logging.Logger]): logging object
+        Args:
+            server_url (str): Specify the MECRM URL to use
+            id (Optional[str]): Data ID on MECRM
+            logger (Optional[logging.Logger]): logging object
 
-    """
+        """
 
         super().__init__(
             server_url=server_url,
@@ -50,7 +52,7 @@ class MECBlob(MECObject):
 
         Returns:
             bytes: Blob data bytes
-        
+
         Raises:
             ValueError: If the property is None.
 
@@ -64,15 +66,15 @@ class MECBlob(MECObject):
 
     def remote_info(self) -> data_api.RespDataInfo:
         """remote_info
-        
+
         Get blob metadata in remote MECRM.
 
         Args:
             None
-        
+
         Returns:
             data_api.RespDataInfo
-        
+
         Raises:
             Exception: If the remote object does not exist.
 
@@ -87,19 +89,21 @@ class MECBlob(MECObject):
             self._logger.error(result.unwrap_err())
             raise MECBlobException("Failed to get data info")
 
+        self._logger.info("Fetch remote Blob info")
+
         return result.unwrap()
-    
+
     async def remote_info_async(self) -> data_api.RespDataInfo:
         """remote_info_async
-        
+
         Asyncronously get blob metadata in remote MECRM.
 
         Args:
             None
-        
+
         Returns:
             data_api.RespDataInfo
-        
+
         Raises:
             Exception: If the remote object does not exist.
 
@@ -107,37 +111,40 @@ class MECBlob(MECObject):
 
         if not self.has_remote():
             raise MECBlobException("No data to get info")
-        
+
         result = await data_api.info_async(self._server_url, self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
             raise MECBlobException("Failed to get data info")
-        
+
+        self._logger.info("Fetch remote Blob info")
+
         return result.unwrap()
 
     # from bytes
 
     def from_bytes(self, data: bytes) -> Self:
         """from_file
-        
+
         Set the Blob from bytes.
-        
+
         Args:
             data (bytes): bytes object
-        
+
         Returns:
             Self
-        
+
         Raises:
             Exception: If object already contains Blob.
-        
+
         """
 
         if self._data is not None:
             raise MECBlobException("Data already exists")
 
         self._data = data
+        self._logger("Set data bytes")
 
         return self
 
@@ -145,22 +152,22 @@ class MECBlob(MECObject):
 
     def from_file(self, file_path: str) -> Self:
         """from_file
-        
+
         Load and set the Blob from a local file.
-        
+
         Args:
             file_path (str): File path to set.
-        
+
         Returns:
             Self
-        
+
         Raises:
             Exception: If object already contains Blob.
-        
+
         """
 
         with open(file_path, "rb") as file:
-            self._data = file.read()
+            self.from_bytes(file.read())
 
         self._logger.info(f"Loaded data from {file_path}")
 
@@ -168,22 +175,22 @@ class MECBlob(MECObject):
 
     async def from_file_async(self, file_path: str) -> Self:
         """from_file_async
-        
+
         Asyncronously load and set the Blob from a local file.
-        
+
         Args:
             file_path (str): File path to load.
-        
+
         Returns:
             Self
-        
+
         Raises:
             Exception: If object already contains Blob.
-        
+
         """
 
         async with aiofiles.open(file_path, "rb") as file:
-            self._data = await file.read()
+            self.from_bytes(await file.read())
 
         self._logger.info(f"Loaded data from {file_path}")
 
@@ -193,9 +200,10 @@ class MECBlob(MECObject):
 
     def save(self, file_path: str) -> Self:
         """save
-        
+
         Save blob as a local file
         """
+
         with open(file_path, "wb") as file:
             file.write(self._data)
 
@@ -226,7 +234,7 @@ class MECBlob(MECObject):
             self._logger.error(result.unwrap_err())
             raise MECBlobException("Failed to upload data")
 
-        self._id = result.unwrap().id
+        self._id = result.unwrap().data_id
         self._logger.info(f"Uploaded data to {self._id}")
 
         return self
@@ -244,7 +252,7 @@ class MECBlob(MECObject):
             self._logger.error(result.unwrap_err())
             raise MECBlobException("Failed to upload data")
 
-        self._id = result.unwrap().id
+        self._id = result.unwrap().data_id
         self._logger.info(f"Uploaded data to {self._id}")
 
         return self
@@ -268,6 +276,7 @@ class MECBlob(MECObject):
             raise MECBlobException("Failed to download data")
 
         self._data = result.unwrap()
+        self._logger.info(f"Downloaded data from {self._id}")
 
         return self
 
@@ -285,5 +294,6 @@ class MECBlob(MECObject):
             raise MECBlobException("Failed to download data")
 
         self._data = result.unwrap()
+        self._logger.info(f"Downloaded data from {self._id}")
 
         return self

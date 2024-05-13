@@ -1,46 +1,39 @@
-from pymec.mec_requester import MECRequester
-from pymec.mec_developer import MECDeveloper
-import time
 import logging
+from pymec.mec_client import MECClient
 
 
-def get_lambda_id(server_url: str, runtime: str) -> str:
-    # Create a developer
-    developer = MECDeveloper(server_url)
-
-    # Create a lambda
-    lambda_id = developer.create_lambda_by_bytes(b"dummy lambda", runtime)
-
-    return lambda_id
+SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
 
 
 def main():
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="[%(levelname)s]:[%(module)s::%(funcName)s()]: %(message)s",
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # Create a client
+    client = MECClient(SERVER_URL, logger=logger)
+
+    # Create a lambda
+    lambda_ = (
+        client.new_lambda()
+        .set_code(client.new_blob().from_bytes(b"pymec+example"))
+        .set_runtime("pymec+example")
     )
 
-    server_url = "http://192.168.168.127:8332/api/v0.5"
-
-    # Get the lambda id
-    lambda_id = get_lambda_id(server_url, "pymec+echo")
-
-    time.sleep(1)
-
-    # Create a requester
-    requester = MECRequester(server_url)
+    # Create a input blob
+    input_blob = client.new_blob().from_bytes(b"Hello")
 
     # Create a job by lambda id and input data bytes
-    job = requester.create_job_by_bytes(lambda_id, b"Hello")
-    # print(job.get_info())
+    job = (
+        client.new_job()
+        .set_lambda(lambda_)
+        .set_input(input_blob)
+        .set_tags(["python3.10"])
+        .run()
+    )
 
     # Wait until the job is finished
-    while not job.is_finished():
-        time.sleep(1)
-
-    # Get the output data
-    output = job.get_output_data()
-    print(output)
+    output_bytes = job.wait_for_finish(sleep_s=0.1).output_bytes()
+    print(output_bytes)
 
 
 if __name__ == "__main__":

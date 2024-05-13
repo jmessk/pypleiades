@@ -1,8 +1,9 @@
 from attrs import define, field
-import httpx
 import logging
 from result import Result, Ok, Err
+from typing import Optional
 
+from . import MECAPI
 from .api_types import Code
 
 
@@ -49,60 +50,6 @@ class RespLambdaCreate:
     lambda_id: str = field(alias="id")
 
 
-def create(
-    server_url: str, data_id: str, runtime: str
-) -> Result[RespLambdaCreate, dict]:
-    endpoint = f"{server_url}/lambda"
-    headers = {"Accept": "application/json"}
-
-    request_json = ReqLambdaCreate(
-        data_id=data_id,
-        runtime=runtime,
-    ).to_dict()
-
-    with httpx.Client() as client:
-        response = client.post(
-            endpoint,
-            headers=headers,
-            json=request_json,
-        )
-
-    response_json: dict = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespLambdaCreate(**response_json))
-
-
-async def create_async(
-    server_url: str, data_id: str, runtime: str
-) -> Result[RespLambdaCreate, dict]:
-    endpoint = f"{server_url}/lambda"
-    headers = {"Accept": "application/json"}
-
-    request_json = ReqLambdaCreate(
-        data_id=data_id,
-        runtime=runtime,
-    ).to_dict()
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            endpoint,
-            headers=headers,
-            json=request_json,
-        )
-
-    response_json: dict = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespLambdaCreate(**response_json))
-
-
 ###############################################################
 
 
@@ -129,39 +76,84 @@ class RespLambdaInfo:
     runtime: str
 
 
-def info(server_url: str, lambda_id: str) -> Result[RespLambdaInfo, dict]:
-    endpoint = f"{server_url}/lambda/{lambda_id}"
-    headers = {"Accept": "application/json"}
-
-    with httpx.Client() as client:
-        response = client.get(
-            endpoint,
-            headers=headers,
-        )
-
-    response_json: dict = response.json()
-    logging.debug(response_json)
-
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
-
-    return Ok(RespLambdaInfo(**response_json))
+###############################################################
 
 
-async def info_async(server_url: str, lambda_id: str) -> Result[RespLambdaInfo, dict]:
-    endpoint = f"{server_url}/lambda/{lambda_id}"
-    headers = {"Accept": "application/json"}
+class LambdaAPI(MECAPI):
+    def __init__(
+        self,
+        server_url: str,
+        logger: Optional[logging.Logger] = None,
+        httpx_config: Optional[dict] = None,
+    ):
+        super().__init__(server_url, logger, httpx_config)
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            endpoint,
-            headers=headers,
-        )
+    # create
 
-    response_json: dict = response.json()
-    logging.debug(response_json)
+    def create(self, data_id: str, runtime: str) -> Result[RespLambdaCreate, dict]:
+        endpoint = f"{self._server_url}/lambda"
 
-    if response_json.get("code") != int(Code.OK):
-        return Err(response_json)
+        request_json = ReqLambdaCreate(
+            data_id=data_id,
+            runtime=runtime,
+        ).to_dict()
 
-    return Ok(RespLambdaInfo(**response_json))
+        response = self._client.post(endpoint, json=request_json)
+
+        response_json: dict = response.json()
+        self._logger.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespLambdaCreate(**response_json))
+
+    async def create_async(
+        self,
+        data_id: str,
+        runtime: str,
+    ) -> Result[RespLambdaCreate, dict]:
+        endpoint = f"{self._server_url}/lambda"
+
+        request_json = ReqLambdaCreate(
+            data_id=data_id,
+            runtime=runtime,
+        ).to_dict()
+
+        response = self._client_async.post(endpoint, json=request_json)
+
+        response_json: dict = response.json()
+        self._logger.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespLambdaCreate(**response_json))
+
+    # info
+
+    def info(self, lambda_id: str) -> Result[RespLambdaInfo, dict]:
+        endpoint = f"{self._server_url}/lambda/{lambda_id}"
+
+        response = self._client.get(endpoint)
+
+        response_json: dict = response.json()
+        self._logger.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespLambdaInfo(**response_json))
+
+    async def info_async(self, lambda_id: str) -> Result[RespLambdaInfo, dict]:
+        endpoint = f"{self._server_url}/lambda/{lambda_id}"
+
+        response = await self._client_async.get(endpoint)
+
+        response_json: dict = response.json()
+        self._logger.debug(response_json)
+
+        if response_json.get("code") != int(Code.OK):
+            return Err(response_json)
+
+        return Ok(RespLambdaInfo(**response_json))
