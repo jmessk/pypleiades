@@ -23,12 +23,13 @@ class MECBlob(MECObject):
     ):
     """MECBlob
 
-    Class for handling Blob
+    Class for handling Blob.
 
     Args:
         server_url (str): Specify the MECRM URL to use
         id (Optional[str]): Data ID on MECRM
         logger (Optional[logging.Logger]): logging object
+
     """
 
         super().__init__(
@@ -45,20 +46,38 @@ class MECBlob(MECObject):
     def data(self) -> bytes:
         """data
 
-        If data is empty, throws an exception.
+        Getter of _data property.
 
         Returns:
             bytes: Blob data bytes
+        
+        Raises:
+            ValueError: If the property is None.
+
         """
 
         if self._data is None:
             raise ValueError("data is not set")
         return self._data
-    
+
     # info
 
     def remote_info(self) -> data_api.RespDataInfo:
         """remote_info
+        
+        Get blob metadata in remote MECRM.
+
+        Args:
+            None
+        
+        Returns:
+            data_api.RespDataInfo
+        
+        Raises:
+            Exception: If the remote object does not exist.
+
+        """
+
         if not self.has_remote():
             raise MECBlobException("No data to get info")
 
@@ -71,6 +90,21 @@ class MECBlob(MECObject):
         return result.unwrap()
     
     async def remote_info_async(self) -> data_api.RespDataInfo:
+        """remote_info_async
+        
+        Asyncronously get blob metadata in remote MECRM.
+
+        Args:
+            None
+        
+        Returns:
+            data_api.RespDataInfo
+        
+        Raises:
+            Exception: If the remote object does not exist.
+
+        """
+
         if not self.has_remote():
             raise MECBlobException("No data to get info")
         
@@ -85,6 +119,21 @@ class MECBlob(MECObject):
     # from bytes
 
     def from_bytes(self, data: bytes) -> Self:
+        """from_file
+        
+        Set the Blob from bytes.
+        
+        Args:
+            data (bytes): bytes object
+        
+        Returns:
+            Self
+        
+        Raises:
+            Exception: If object already contains Blob.
+        
+        """
+
         if self._data is not None:
             raise MECBlobException("Data already exists")
 
@@ -95,6 +144,21 @@ class MECBlob(MECObject):
     # from file
 
     def from_file(self, file_path: str) -> Self:
+        """from_file
+        
+        Load and set the Blob from a local file.
+        
+        Args:
+            file_path (str): File path to set.
+        
+        Returns:
+            Self
+        
+        Raises:
+            Exception: If object already contains Blob.
+        
+        """
+
         with open(file_path, "rb") as file:
             self._data = file.read()
 
@@ -103,6 +167,21 @@ class MECBlob(MECObject):
         return self
 
     async def from_file_async(self, file_path: str) -> Self:
+        """from_file_async
+        
+        Asyncronously load and set the Blob from a local file.
+        
+        Args:
+            file_path (str): File path to load.
+        
+        Returns:
+            Self
+        
+        Raises:
+            Exception: If object already contains Blob.
+        
+        """
+
         async with aiofiles.open(file_path, "rb") as file:
             self._data = await file.read()
 
@@ -113,6 +192,10 @@ class MECBlob(MECObject):
     # save as file
 
     def save(self, file_path: str) -> Self:
+        """save
+        
+        Save blob as a local file
+        """
         with open(file_path, "wb") as file:
             file.write(self._data)
 
