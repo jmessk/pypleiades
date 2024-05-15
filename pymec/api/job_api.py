@@ -137,13 +137,15 @@ class RespJobUpdate:
 
 
 class JobAPI(MECAPI):
+    __slots__ = ["_server_url", "_logger", "_client", "_client_async"]
+
     def __init__(
         self,
         server_url: str,
         logger: Optional[logging.Logger] = None,
         httpx_config: Optional[dict] = None,
     ):
-        super().__init__(server_url, logger, httpx_config)
+        super().__init__(server_url, logger=logger, httpx_config=httpx_config)
 
     # create
 

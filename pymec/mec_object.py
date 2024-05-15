@@ -18,10 +18,15 @@ class MECObject(object):
         if logger:
             self._logger: logging.Logger = logger
         else:
-            self._logger = logging.getLogger(__name__)
+            self._logger = logging.getLogger()
             self._logger.setLevel(logging.INFO)
 
-        self._httpx_config = httpx_config
+        if httpx_config:
+            self._httpx_config = httpx_config
+        else:
+            self._httpx_config = {
+                "timeout": 30.0,
+            }
 
     @property
     def id(self) -> str:

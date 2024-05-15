@@ -2,25 +2,22 @@ import logging
 from pymec.pleiades_client import PleiadesClient
 
 
-SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
+# SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
+SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"
 
 
 def main():
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-
-    httpx_config = {
-        "timeout": 30.0,
-    }
+    logger.setLevel(logging.INFO)
 
     # Create a client
-    client = PleiadesClient(SERVER_URL, logger=logger, httpx_config=httpx_config)
+    client = PleiadesClient(SERVER_URL, logger=logger)
 
     # Create a lambda
     lambda_ = (
         client.new_lambda()
-        .set_code(client.new_blob().from_bytes(b"pymec+example"))
-        .set_runtime("pymec+example")
+        .set_code(client.new_blob().from_bytes(b"pymec echo"))
+        .set_runtime("pymec+echo")
     )
 
     # Create a input blob
@@ -33,11 +30,11 @@ def main():
         .set_input(input_blob)
         .set_tags(["python3.10"])
         .run()
+        .wait_for_finish(sleep_s=0.1)
     )
 
-    # Wait until the job is finished
-    output_bytes = job.wait_for_finish(sleep_s=0.1).output_bytes()
-    print(output_bytes)
+    # Get the output data
+    print(job.output.data)
 
 
 if __name__ == "__main__":

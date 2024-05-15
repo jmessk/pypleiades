@@ -15,14 +15,10 @@ class MECAPI(object):
         self._server_url = server_url
         
         if logger:
-            self._logger = logger
+            self._logger: logging.Logger = logger
         else:
-            self._logger = logging.getLogger(__name__)
+            self._logger: logging.Logger = logging.getLogger(__name__)
             self._logger.setLevel(logging.INFO)
 
-        if httpx_config:
-            self._client = httpx.Client(**httpx_config)
-            self._client_async = httpx.AsyncClient(**httpx_config)
-        else:
-            self._client = httpx.Client()
-            self._client_async = httpx.AsyncClient()
+        self._client: httpx.Client = httpx.Client(**httpx_config)
+        self._client_async: httpx.AsyncClient = httpx.AsyncClient(**httpx_config)

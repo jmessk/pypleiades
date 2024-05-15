@@ -13,7 +13,7 @@ class MECWorker(MECObject):
         "_id",
         "_logger",
         "_httpx_config",
-        "_self._worker_api",
+        "_worker_api",
         "_runtimes",
         "_tags",
     ]
@@ -42,9 +42,7 @@ class MECWorker(MECObject):
     # properties
 
     @property
-    def runtimes(self) -> list[str]:
-        if self._runtimes is None:
-            raise ValueError("runtimes is not set")
+    def runtimes(self) -> Optional[list[str]]:
         return self._runtimes
 
     @property
@@ -62,6 +60,8 @@ class MECWorker(MECObject):
         if result.is_err():
             self._logger.error(result.unwrap_err())
             raise Exception()
+        
+        self._logger.info("Fetched remote worker info.")
 
         return result.unwrap()
 
@@ -74,6 +74,8 @@ class MECWorker(MECObject):
         if result.is_err():
             self._logger.error(result.unwrap_err())
             raise Exception()
+        
+        self._logger.info("Fetched remote worker info.")
 
         return result.unwrap()
 
@@ -84,6 +86,7 @@ class MECWorker(MECObject):
             raise Exception()
 
         self._runtimes = runtimes
+        self._logger.info(f"Set worker runtimes: {self._runtimes}")
 
         return self
 
@@ -100,6 +103,7 @@ class MECWorker(MECObject):
             raise Exception()
 
         self._id = result.unwrap().worker_id
+        self._logger.info(f"Registered worker: {self._id}")
 
         return self
 
@@ -114,6 +118,7 @@ class MECWorker(MECObject):
             raise Exception()
 
         self._id = result.unwrap().worker_id
+        self._logger.info(f"Registered worker: {self._id}")
 
         return self
 
@@ -121,6 +126,7 @@ class MECWorker(MECObject):
 
     def set_tags(self, tags: list[str]) -> Self:
         self._tags = tags
+        self._logger.info(f"Set worker tags: {self._tags}")
 
         return self
 
@@ -129,6 +135,8 @@ class MECWorker(MECObject):
     def contract(self, timeout: int = 20) -> Optional[MECJob]:
         if not self.has_remote():
             raise Exception()
+        
+        self._logger.info("Contracting job.")
 
         result = self._worker_api.contract(self._id, self._tags, timeout)
 
@@ -139,13 +147,17 @@ class MECWorker(MECObject):
         response = result.unwrap()
 
         if response.job_id is None:
+            self._logger.info("No job to contract.")
             return None
+        
+        self._logger.info(f"Contracted job: {response.job_id}")
 
         return MECJob(
             self._server_url,
-            job_id=response.job_id,
+            id=response.job_id,
             logger=self._logger,
-        ).download()
+            httpx_config=self._httpx_config,
+        ).fetch_meta()
 
     async def contract_async(self, timeout: int = 20) -> Optional[MECJob]:
         if not self.has_remote():
@@ -164,13 +176,17 @@ class MECWorker(MECObject):
         response = result.unwrap()
 
         if response.job_id is None:
+            self._logger.info("No job to contract.")
             return None
+        
+        self._logger.info(f"Contracted job: {response.job_id}")
 
         return await MECJob(
             self._server_url,
             job_id=response.job_id,
             logger=self._logger,
-        ).download_async()
+            httpx_config=self._httpx_config,
+        ).fetch_meta_async()
 
     # wait contract
 

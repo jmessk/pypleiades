@@ -49,15 +49,11 @@ class MECLambda(MECObject):
     # properties
 
     @property
-    def blob(self) -> MECBlob:
-        if self._blob is None:
-            raise ValueError("blob is not set")
+    def blob(self) -> Optional[MECBlob]:
         return self._blob
 
     @property
-    def runtime(self) -> str:
-        if self._runtime is None:
-            raise ValueError("runtime is not set")
+    def runtime(self) -> Optional[str]:
         return self._runtime
 
     # info
@@ -72,6 +68,8 @@ class MECLambda(MECObject):
             self._logger.error(result.unwrap_err())
             raise Exception()
 
+        self._logger.info("Fetched remote lambda info.")
+
         return result.unwrap()
 
     async def remote_info_async(self) -> lambda_api.RespLambdaInfo:
@@ -83,6 +81,8 @@ class MECLambda(MECObject):
         if result.is_err():
             self._logger.error(result.unwrap_err())
             raise Exception()
+
+        self._logger.info("Fetched remote lambda info.")
 
         return result.unwrap()
 
@@ -96,6 +96,7 @@ class MECLambda(MECObject):
             raise Exception()
 
         self._blob = blob
+        self._logger.info("Set lambda code.")
 
         return self
 
@@ -109,6 +110,7 @@ class MECLambda(MECObject):
             raise Exception()
 
         self._runtime = runtime
+        self._logger.info(f"Set lambda runtime: {self._runtime} .")
 
         return self
 
@@ -137,6 +139,7 @@ class MECLambda(MECObject):
             raise Exception()
 
         self._id = result.unwrap().lambda_id
+        self._logger.info(f"Uploaded lambda to {self._id} .")
 
         return self
 
@@ -160,6 +163,7 @@ class MECLambda(MECObject):
             raise Exception()
 
         self._id = result.unwrap().lambda_id
+        self._logger.info(f"Uploaded lambda to {self._id} .")
 
         return self
 
@@ -178,7 +182,10 @@ class MECLambda(MECObject):
             self._server_url,
             id=info.data_id,
             logger=self._logger,
+            httpx_config=self._httpx_config,
         ).download()
+
+        self._logger.info(f"Downloaded lambda from {self._id} .")
 
         return self
 
@@ -195,6 +202,9 @@ class MECLambda(MECObject):
             self._server_url,
             id=info.data_id,
             logger=self._logger,
+            httpx_config=self._httpx_config,
         ).download_async()
+
+        self._logger.info(f"Downloaded lambda from {self._id} .")
 
         return self

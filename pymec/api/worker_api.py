@@ -77,7 +77,7 @@ class ReqWorkerContract:
         }
 
 
-@define(slots=True, frozen=True)
+# @define(slots=True, frozen=True)
 class RespWorkerContract(BaseModel):
     """Contract a worker
     method: `POST`
@@ -124,13 +124,15 @@ class RespWorkerInfo:
 
 
 class WorkerAPI(MECAPI):
+    __slots__ = ["_server_url", "_logger", "_client", "_client_async"]
+
     def __init__(
         self,
         server_url: str,
         logger: Optional[logging.Logger] = None,
         httpx_config: Optional[dict] = None,
     ):
-        super().__init__(server_url, logger, httpx_config)
+        super().__init__(server_url, logger=logger, httpx_config=httpx_config)
 
     # register
 
@@ -186,10 +188,13 @@ class WorkerAPI(MECAPI):
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
-            return Err(response_json)
-
-        return Ok(RespWorkerContract(**response_json))
+        match response_json.get("code"):
+            case int(Code.OK):
+                return Ok(RespWorkerContract(**response_json))
+            case int(Code.NO_JOB):
+                return Ok(RespWorkerContract(**response_json))
+            case _:
+                return Err(response_json)
 
     async def contract_async(
         self,
@@ -210,10 +215,13 @@ class WorkerAPI(MECAPI):
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
-            return Err(response_json)
-
-        return Ok(RespWorkerContract(**response_json))
+        match response_json.get("code"):
+            case int(Code.OK):
+                return Ok(RespWorkerContract(**response_json))
+            case int(Code.NO_JOB):
+                return Ok(RespWorkerContract(**response_json))
+            case _:
+                return Err(response_json)
 
     # info
 

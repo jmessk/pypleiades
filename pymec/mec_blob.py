@@ -58,7 +58,7 @@ class MECBlob(MECObject):
     # properties
 
     @property
-    def data(self) -> bytes:
+    def data(self) -> Optional[bytes]:
         """data
 
         Getter of _data property.
@@ -66,13 +66,8 @@ class MECBlob(MECObject):
         Returns:
             bytes: Blob data bytes
 
-        Raises:
-            ValueError: If the property is None.
-
         """
 
-        if self._data is None:
-            raise ValueError("data is not set")
         return self._data
 
     # info
@@ -94,15 +89,15 @@ class MECBlob(MECObject):
         """
 
         if not self.has_remote():
-            raise MECBlobException("No data to get info")
+            raise MECBlobException("No data to get info.")
 
         result = self._data_api.info(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
-            raise MECBlobException("Failed to get data info")
+            raise MECBlobException("Failed to get data info.")
 
-        self._logger.info("Fetch remote Blob info")
+        self._logger.info("Fetched remote Blob info.")
 
         return result.unwrap()
 
@@ -123,15 +118,15 @@ class MECBlob(MECObject):
         """
 
         if not self.has_remote():
-            raise MECBlobException("No data to get info")
+            raise MECBlobException("No data to get info.")
 
         result = await self._data_api.info_async(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
-            raise MECBlobException("Failed to get data info")
+            raise MECBlobException("Failed to get data info.")
 
-        self._logger.info("Fetch remote Blob info")
+        self._logger.info("Fetch remote Blob info.")
 
         return result.unwrap()
 
@@ -154,10 +149,10 @@ class MECBlob(MECObject):
         """
 
         if self._data is not None:
-            raise MECBlobException("Data already exists")
+            raise MECBlobException("Data already exists.")
 
         self._data = data
-        self._logger("Set data bytes")
+        self._logger.info("Set data bytes.")
 
         return self
 
@@ -182,7 +177,7 @@ class MECBlob(MECObject):
         with open(file_path, "rb") as file:
             self.from_bytes(file.read())
 
-        self._logger.info(f"Loaded data from {file_path}")
+        self._logger.info(f"Loaded data from {file_path} .")
 
         return self
 
@@ -205,7 +200,7 @@ class MECBlob(MECObject):
         async with aiofiles.open(file_path, "rb") as file:
             self.from_bytes(await file.read())
 
-        self._logger.info(f"Loaded data from {file_path}")
+        self._logger.info(f"Loaded data from {file_path} .")
 
         return self
 
@@ -220,7 +215,7 @@ class MECBlob(MECObject):
         with open(file_path, "wb") as file:
             file.write(self._data)
 
-        self._logger.info(f"Saved data to {file_path}")
+        self._logger.info(f"Saved data to {file_path} .")
 
         return self
 
@@ -228,7 +223,7 @@ class MECBlob(MECObject):
         async with aiofiles.open(file_path, "wb") as file:
             await file.write(self._data)
 
-        self._logger.info(f"Saved data to {file_path}")
+        self._logger.info(f"Saved data to {file_path} .")
 
         return self
 
@@ -236,37 +231,37 @@ class MECBlob(MECObject):
 
     def upload(self) -> Self:
         if self.has_remote():
-            raise MECBlobException("Data already exists on remote server")
+            raise MECBlobException("Data already exists on remote server.")
 
         if self._data is None:
-            raise MECBlobException("No data to upload")
+            raise MECBlobException("No data to upload.")
 
         result = self._data_api.post_data(self._data)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
-            raise MECBlobException("Failed to upload data")
+            raise MECBlobException("Failed to upload data.")
 
         self._id = result.unwrap().data_id
-        self._logger.info(f"Uploaded data to {self._id}")
+        self._logger.info(f"Uploaded data to {self._id} .")
 
         return self
 
     async def upload_async(self) -> Self:
         if self.has_remote():
-            raise MECBlobException("Data already exists on remote server")
+            raise MECBlobException("Data already exists on remote server.")
 
         if self._data is None:
-            raise MECBlobException("No data to upload")
+            raise MECBlobException("No data to upload.")
 
         result = await self._data_api.post_data_async(self._data)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
-            raise MECBlobException("Failed to upload data")
+            raise MECBlobException("Failed to upload data.")
 
         self._id = result.unwrap().data_id
-        self._logger.info(f"Uploaded data to {self._id}")
+        self._logger.info(f"Uploaded data to {self._id} .")
 
         return self
 
@@ -277,36 +272,36 @@ class MECBlob(MECObject):
 
     def download(self) -> Self:
         if not self.has_remote():
-            raise MECBlobException("No data to download")
+            raise MECBlobException("No data to download.")
 
         if self._data is not None:
-            raise MECBlobException("This object already contains data")
+            raise MECBlobException("This object already contains data.")
 
         result = self._data_api.get_data(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
-            raise MECBlobException("Failed to download data")
+            raise MECBlobException("Failed to download data.")
 
         self._data = result.unwrap()
-        self._logger.info(f"Downloaded data from {self._id}")
+        self._logger.info(f"Downloaded data from {self._id} .")
 
         return self
 
     async def download_async(self) -> Self:
         if not self.has_remote():
-            raise MECBlobException("No data to download")
+            raise MECBlobException("No data to download.")
 
         if self._data is not None:
-            raise MECBlobException("This object already contains data")
+            raise MECBlobException("This object already contains data.")
 
         result = await self._data_api.get_data_async(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
-            raise MECBlobException("Failed to download data")
+            raise MECBlobException("Failed to download data.")
 
         self._data = result.unwrap()
-        self._logger.info(f"Downloaded data from {self._id}")
+        self._logger.info(f"Downloaded data from {self._id} .")
 
         return self

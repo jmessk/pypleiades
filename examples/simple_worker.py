@@ -8,14 +8,10 @@ SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"
 
 def main():
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-
-    httpx_config = {
-        "timeout": 30.0,
-    }
+    logger.setLevel(logging.INFO)
 
     # Create a client
-    client = PleiadesClient(SERVER_URL, logger=logger, httpx_config=httpx_config)
+    client = PleiadesClient(SERVER_URL, logger=logger)
 
     # Create a worker
     worker = (
@@ -23,8 +19,6 @@ def main():
         .set_runtimes(
             [
                 "pymec+echo",
-                "pymec+echo+python3.10",
-                "pymec+echo+example_worker",
             ]
         )
         .register()
@@ -35,8 +29,8 @@ def main():
     job = worker.wait_contract()
 
     # Get the input data
-    input_bytes = job.input_bytes()
-    _ = job.lambda_bytes()
+    input_bytes = job.input.data
+    # _ = job.lambda_.blob.data
 
     # Process the data
     input_data = input_bytes.decode("utf-8")
