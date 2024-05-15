@@ -120,7 +120,7 @@ class LambdaAPI(MECAPI):
             runtime=runtime,
         ).to_dict()
 
-        response = self._client_async.post(endpoint, json=request_json)
+        response = await self._client_async.post(endpoint, json=request_json)
 
         response_json: dict = response.json()
         self._logger.debug(response_json)

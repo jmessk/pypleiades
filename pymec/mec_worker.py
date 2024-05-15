@@ -1,7 +1,6 @@
 from typing import Optional
 from typing_extensions import Self
 import logging
-import httpx
 
 from .api import worker_api
 from .mec_object import MECObject
@@ -9,16 +8,32 @@ from .mec_job import MECJob
 
 
 class MECWorker(MECObject):
-    __slots__ = ["_server_url", "_id", "_logger", "_runtimes", "_tags"]
+    __slots__ = [
+        "_server_url",
+        "_id",
+        "_logger",
+        "_httpx_config",
+        "_self._worker_api",
+        "_runtimes",
+        "_tags",
+    ]
 
     def __init__(
         self,
         server_url: str,
         logger: Optional[logging.Logger] = None,
+        httpx_config: Optional[dict] = None,
     ):
         super().__init__(
             server_url=server_url,
             logger=logger,
+            httpx_config=httpx_config,
+        )
+
+        self._worker_api = worker_api.WorkerAPI(
+            self._server_url,
+            logger=self._logger,
+            httpx_config=self._httpx_config,
         )
 
         self._runtimes: Optional[list[str]] = None
@@ -42,7 +57,7 @@ class MECWorker(MECObject):
         if not self.has_remote():
             raise Exception()
 
-        result = worker_api.info(self._server_url, self._id)
+        result = self._worker_api.info(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -54,7 +69,7 @@ class MECWorker(MECObject):
         if not self.has_remote():
             raise Exception()
 
-        result = await worker_api.info_async(self._server_url, self._id)
+        result = await self._worker_api.info_async(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -78,7 +93,7 @@ class MECWorker(MECObject):
         if self.has_remote():
             raise Exception()
 
-        result = worker_api.register(self._server_url, self._runtimes)
+        result = self._worker_api.register(self._runtimes)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -92,7 +107,7 @@ class MECWorker(MECObject):
         if self.has_remote():
             raise Exception()
 
-        result = await worker_api.register_async(self._server_url, self._runtimes)
+        result = await self._worker_api.register_async(self._runtimes)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -115,7 +130,7 @@ class MECWorker(MECObject):
         if not self.has_remote():
             raise Exception()
 
-        result = worker_api.contract(self._server_url, self._id, self._tags, timeout)
+        result = self._worker_api.contract(self._id, self._tags, timeout)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -136,8 +151,7 @@ class MECWorker(MECObject):
         if not self.has_remote():
             raise Exception()
 
-        result = await worker_api.contract_async(
-            self._server_url,
+        result = await self._worker_api.contract_async(
             self._id,
             self._tags,
             timeout,

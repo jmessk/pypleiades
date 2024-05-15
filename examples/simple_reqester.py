@@ -1,5 +1,5 @@
 import logging
-from pymec.mec_client import MECClient
+from pymec.pleiades_client import PleiadesClient
 
 
 SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
@@ -9,8 +9,12 @@ def main():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
+    httpx_config = {
+        "timeout": 30.0,
+    }
+
     # Create a client
-    client = MECClient(SERVER_URL, logger=logger)
+    client = PleiadesClient(SERVER_URL, logger=logger, httpx_config=httpx_config)
 
     # Create a lambda
     lambda_ = (

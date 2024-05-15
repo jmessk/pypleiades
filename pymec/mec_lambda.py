@@ -1,7 +1,6 @@
 from typing import Optional
 from typing_extensions import Self
 import logging
-import httpx
 
 from .api import lambda_api
 from .mec_object import MECObject
@@ -14,18 +13,34 @@ from .mec_blob import MECBlob
 
 
 class MECLambda(MECObject):
-    __slots__ = ["_server_url", "_id", "_logger", "_blob", "_runtime"]
+    __slots__ = [
+        "_server_url",
+        "_id",
+        "_logger",
+        "_httpx_config",
+        "_lambda_api",
+        "_blob",
+        "_runtime",
+    ]
 
     def __init__(
         self,
         server_url: str,
         id: Optional[str] = None,
         logger: Optional[logging.Logger] = None,
+        httpx_config: Optional[dict] = None,
     ):
         super().__init__(
             server_url=server_url,
             id=id,
             logger=logger,
+            httpx_config=httpx_config,
+        )
+
+        self._lambda_api = lambda_api.LambdaAPI(
+            self._server_url,
+            logger=self._logger,
+            httpx_config=self._httpx_config,
         )
 
         self._blob: Optional[MECBlob] = None
@@ -51,7 +66,7 @@ class MECLambda(MECObject):
         if not self.has_remote():
             raise Exception()
 
-        result = lambda_api.info(self._server_url, self._id)
+        result = self._lambda_api.info(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -63,7 +78,7 @@ class MECLambda(MECObject):
         if not self.has_remote():
             raise Exception()
 
-        result = await lambda_api.info_async(self._server_url, self._id)
+        result = await self._lambda_api.info_async(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -108,12 +123,11 @@ class MECLambda(MECObject):
 
         if self._runtime is None:
             raise Exception()
-        
+
         if not self._blob.has_remote():
             self._blob.upload()
 
-        result = lambda_api.create(
-            self._server_url,
+        result = self._lambda_api.create(
             self._blob.id,
             self._runtime,
         )
@@ -136,8 +150,7 @@ class MECLambda(MECObject):
         if self._runtime is None:
             raise Exception()
 
-        result = await lambda_api.create_async(
-            self._server_url,
+        result = await self._lambda_api.create_async(
             self._blob.id,
             self._runtime,
         )

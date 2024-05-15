@@ -13,7 +13,12 @@ class MECAPI(object):
         httpx_config: Optional[dict] = None,
     ):
         self._server_url = server_url
-        self._logger = logger
+        
+        if logger:
+            self._logger = logger
+        else:
+            self._logger = logging.getLogger(__name__)
+            self._logger.setLevel(logging.INFO)
 
         if httpx_config:
             self._client = httpx.Client(**httpx_config)

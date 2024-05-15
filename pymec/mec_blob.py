@@ -2,7 +2,6 @@ from typing import Optional
 from typing_extensions import Self
 import logging
 import aiofiles
-import httpx
 
 from .api import data_api
 from .mec_object import MECObject
@@ -14,14 +13,21 @@ class MECBlobException(Exception):
 
 
 class MECBlob(MECObject):
-    __slots__ = ["_server_url", "_id", "_logger", "_data"]
+    __slots__ = [
+        "_server_url",
+        "_id",
+        "_logger",
+        "_httpx_config",
+        "_data_api",
+        "_data",
+    ]
 
     def __init__(
         self,
         server_url: str,
         id: Optional[str] = None,
         logger: Optional[logging.Logger] = None,
-        httpx_config: httpx.
+        httpx_config: Optional[dict] = None,
     ):
         """MECBlob
 
@@ -38,6 +44,13 @@ class MECBlob(MECObject):
             server_url=server_url,
             id=id,
             logger=logger,
+            httpx_config=httpx_config,
+        )
+
+        self._data_api = data_api.DataAPI(
+            self._server_url,
+            logger=self._logger,
+            httpx_config=self._httpx_config,
         )
 
         self._data: Optional[bytes] = None
@@ -83,7 +96,7 @@ class MECBlob(MECObject):
         if not self.has_remote():
             raise MECBlobException("No data to get info")
 
-        result = data_api.info(self._server_url, self._id)
+        result = self._data_api.info(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -102,7 +115,7 @@ class MECBlob(MECObject):
             None
 
         Returns:
-            data_api.RespDataInfo
+            data_apiDataInfo
 
         Raises:
             Exception: If the remote object does not exist.
@@ -112,7 +125,7 @@ class MECBlob(MECObject):
         if not self.has_remote():
             raise MECBlobException("No data to get info")
 
-        result = await data_api.info_async(self._server_url, self._id)
+        result = await self._data_api.info_async(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -228,7 +241,7 @@ class MECBlob(MECObject):
         if self._data is None:
             raise MECBlobException("No data to upload")
 
-        result = data_api.post_data(self._server_url, self._data)
+        result = self._data_api.post_data(self._data)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -246,7 +259,7 @@ class MECBlob(MECObject):
         if self._data is None:
             raise MECBlobException("No data to upload")
 
-        result = await data_api.post_data_async(self._server_url, self._data)
+        result = await self._data_api.post_data_async(self._data)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -269,7 +282,7 @@ class MECBlob(MECObject):
         if self._data is not None:
             raise MECBlobException("This object already contains data")
 
-        result = data_api.get_data(self._server_url, self._id)
+        result = self._data_api.get_data(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -287,7 +300,7 @@ class MECBlob(MECObject):
         if self._data is not None:
             raise MECBlobException("This object already contains data")
 
-        result = await data_api.get_data_async(self._server_url, self._id)
+        result = await self._data_api.get_data_async(self._id)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())

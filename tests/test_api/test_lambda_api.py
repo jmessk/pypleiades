@@ -1,26 +1,35 @@
 import pytest
+import asyncio
 
-from pymec.api import data_api, lambda_api
+from pymec.api.data_api import DataAPI
+from pymec.api.lambda_api import LambdaAPI
 
 
 SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def input_data_id():
+    data_api = DataAPI(SERVER_URL)
+
     input_bytes = b"Hello, World!"
-    response_post = data_api.post_data(SERVER_URL, input_bytes).unwrap()
+    response_post = data_api.post_data(input_bytes).unwrap()
 
     return response_post.data_id
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def runtime():
     return str("pymec+pytest")
 
 
-def test_create(input_data_id, runtime):
-    response_create = lambda_api.create(SERVER_URL, input_data_id, runtime).unwrap()
+@pytest.fixture(scope="module")
+def lambda_api() -> LambdaAPI:
+    return LambdaAPI(SERVER_URL)
+
+
+def test_create(input_data_id, lambda_api, runtime):
+    response_create = lambda_api.create(input_data_id, runtime).unwrap()
 
     assert response_create.code == 0
     assert response_create.lambda_id != "0"
@@ -28,9 +37,9 @@ def test_create(input_data_id, runtime):
 
 
 @pytest.mark.asyncio
-async def test_create_async(input_data_id, runtime):
+async def test_create_async(input_data_id, lambda_api, runtime):
     response_create = (
-        await lambda_api.create_async(SERVER_URL, input_data_id, runtime)
+        await lambda_api.create_async(input_data_id, runtime)
     ).unwrap()
 
     assert response_create.code == 0
@@ -38,9 +47,9 @@ async def test_create_async(input_data_id, runtime):
     assert response_create.lambda_id != ""
 
 
-def test_info(input_data_id, runtime):
-    response_create = lambda_api.create(SERVER_URL, input_data_id, runtime).unwrap()
-    response_info = lambda_api.info(SERVER_URL, response_create.lambda_id).unwrap()
+def test_info(input_data_id, lambda_api, runtime):
+    response_create = lambda_api.create(input_data_id, runtime).unwrap()
+    response_info = lambda_api.info(response_create.lambda_id).unwrap()
 
     assert response_info.code == 0
     assert response_info.lambda_id == response_create.lambda_id
@@ -49,12 +58,12 @@ def test_info(input_data_id, runtime):
 
 
 @pytest.mark.asyncio
-async def test_info_async(input_data_id, runtime):
+async def test_info_async(input_data_id, lambda_api, runtime):
     response_create = (
-        await lambda_api.create_async(SERVER_URL, input_data_id, runtime)
+        await lambda_api.create_async(input_data_id, runtime)
     ).unwrap()
     response_info = (
-        await lambda_api.info_async(SERVER_URL, response_create.lambda_id)
+        await lambda_api.info_async(response_create.lambda_id)
     ).unwrap()
 
     assert response_info.code == 0
