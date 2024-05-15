@@ -28,12 +28,10 @@ def main():
     # Wait for a job
     job = worker.wait_contract()
 
-    # Get the input data
-    input_bytes = job.input.data
     # _ = job.lambda_.blob.data
 
     # Process the data
-    input_data = input_bytes.decode("utf-8")
+    input_data = job.input.data.decode("utf-8")
     output_data = f"{input_data}, World!".encode("utf-8")
 
     # create output blob
