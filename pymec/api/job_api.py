@@ -199,10 +199,20 @@ class JobAPI(MECAPI):
 
     # info
 
-    def info(self, job_id: str) -> Result[RespJobInfo, dict]:
+    def info(self, job_id: str, timeout: int = 0) -> Result[RespJobInfo, dict]:
         endpoint = f"{self._server_url}/job/{job_id}"
 
-        response = self._client.get(endpoint)
+        if timeout == 0:
+            response = self._client.get(endpoint)
+
+        else:
+            response = self._client.get(
+                endpoint,
+                params={
+                    "except": "Finished",
+                    "timeout": timeout,
+                },
+            )
 
         response_json: dict = response.json()
         self._logger.debug(response_json)

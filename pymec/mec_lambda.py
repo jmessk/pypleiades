@@ -49,11 +49,13 @@ class MECLambda(MECObject):
     # properties
 
     @property
-    def blob(self) -> Optional[MECBlob]:
+    def blob(self) -> MECBlob:
+        if self._blob.has_remote() and self._blob.data is None:
+            self._blob.download()
         return self._blob
 
     @property
-    def runtime(self) -> Optional[str]:
+    def runtime(self) -> str:
         return self._runtime
 
     # info

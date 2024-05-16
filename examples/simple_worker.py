@@ -2,13 +2,14 @@ import logging
 from pymec.pleiades_client import PleiadesClient
 
 
-# SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
-SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"
+SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
+# SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     # Create a client
     client = PleiadesClient(SERVER_URL, logger=logger)

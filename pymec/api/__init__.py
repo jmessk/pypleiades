@@ -22,3 +22,5 @@ class MECAPI(object):
 
         self._client: httpx.Client = httpx.Client(**httpx_config)
         self._client_async: httpx.AsyncClient = httpx.AsyncClient(**httpx_config)
+
+# User-Agent: pymec/v0.5.1

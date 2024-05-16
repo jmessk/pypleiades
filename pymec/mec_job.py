@@ -247,7 +247,7 @@ class MECJob(MECObject):
         if not self.has_remote():
             raise Exception()
 
-        result = self._job_api.info(self._id)
+        result = self._job_api.info(self._id, timeout=10)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
