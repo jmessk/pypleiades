@@ -65,9 +65,6 @@ class MECJob(MECObject):
     # input
 
     def set_input(self, blob: MECBlob) -> Self:
-        if self.has_input():
-            raise Exception()
-
         self._input_blob = blob
         self._logger.info("Set input blob.")
 
@@ -104,9 +101,6 @@ class MECJob(MECObject):
     # tags
 
     def set_tags(self, tags: list[str]) -> Self:
-        if self.has_remote():
-            raise Exception()
-
         self._tags = tags
         self._logger.info(f"Set job tags: {self._tags}")
 
@@ -147,9 +141,6 @@ class MECJob(MECObject):
     # run
 
     def run(self) -> Self:
-        if self.has_remote():
-            raise Exception()
-
         if not self.has_input():
             raise ValueError("input is not set")
 
@@ -178,9 +169,6 @@ class MECJob(MECObject):
         return self
 
     async def run_async(self) -> Self:
-        if self.has_remote():
-            raise Exception()
-
         if not self.has_input():
             raise ValueError("input is not set")
 
