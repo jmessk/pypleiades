@@ -78,7 +78,7 @@ class MECBlob(MECObject):
     async def get_data_async(self) -> bytes:
         # リモートに存在するがデータがない場合は取得する
         if self.has_remote() and not self.has_data():
-            self.fetch_async()
+            await self.fetch_async()
 
         # リモートにもデータがなくローカルにもデータがない場合は例外を投げる
         if not self.has_data():
