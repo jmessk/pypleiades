@@ -9,7 +9,7 @@ SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
 def main():
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # Create a client
     client = PleiadesClient(SERVER_URL, logger=logger)
@@ -17,7 +17,7 @@ def main():
     # Create a lambda
     lambda_ = (
         client.new_lambda()
-        .set_code(client.new_blob().from_bytes(b"pymec echo"))
+        .set_blob(client.new_blob().from_bytes(b"pymec echo"))
         .set_runtime("pymec+echo")
     )
 
@@ -31,11 +31,11 @@ def main():
         .set_input(input_blob)
         .set_tags(["python3.10"])
         .run()
-        .wait_for_finish(sleep_s=0.1)
+        .wait("Finished", 5)
     )
 
     # Get the output data
-    print(job.output.data)
+    print(job.get_output().get_data())
 
 
 if __name__ == "__main__":

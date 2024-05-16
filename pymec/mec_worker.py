@@ -39,15 +39,21 @@ class MECWorker(MECObject):
         self._runtimes: Optional[list[str]] = None
         self._tags: list[str] = []
 
-    # properties
+    # checker
 
-    @property
-    def runtimes(self) -> Optional[list[str]]:
-        return self._runtimes
+    def has_runtimes(self) -> bool:
+        return self._runtimes is not None
 
-    @property
-    def tags(self) -> list[str]:
-        return self._tags
+    # runtimes
+
+    def set_runtimes(self, runtimes: list[str]) -> Self:
+        if self.has_remote():
+            raise Exception()
+
+        self._runtimes = runtimes
+        self._logger.info(f"Set worker runtimes: {self._runtimes}")
+
+        return self
 
     # info
 
@@ -60,7 +66,7 @@ class MECWorker(MECObject):
         if result.is_err():
             self._logger.error(result.unwrap_err())
             raise Exception()
-        
+
         self._logger.info("Fetched remote worker info.")
 
         return result.unwrap()
@@ -74,26 +80,18 @@ class MECWorker(MECObject):
         if result.is_err():
             self._logger.error(result.unwrap_err())
             raise Exception()
-        
+
         self._logger.info("Fetched remote worker info.")
 
         return result.unwrap()
-
-    # runtimes
-
-    def set_runtimes(self, runtimes: list[str]) -> Self:
-        if self.has_remote():
-            raise Exception()
-
-        self._runtimes = runtimes
-        self._logger.info(f"Set worker runtimes: {self._runtimes}")
-
-        return self
 
     # register
 
     def register(self) -> Self:
         if self.has_remote():
+            raise Exception()
+        
+        if not self.has_runtimes():
             raise Exception()
 
         result = self._worker_api.register(self._runtimes)
@@ -109,6 +107,9 @@ class MECWorker(MECObject):
 
     async def register_async(self) -> Self:
         if self.has_remote():
+            raise Exception()
+        
+        if not self.has_runtimes():
             raise Exception()
 
         result = await self._worker_api.register_async(self._runtimes)
@@ -132,13 +133,13 @@ class MECWorker(MECObject):
 
     # contract
 
-    def contract(self, timeout: int = 20) -> Optional[MECJob]:
+    def contract(self, timeout_s: int = 20) -> Optional[MECJob]:
         if not self.has_remote():
             raise Exception()
-        
+
         self._logger.info("Contracting job.")
 
-        result = self._worker_api.contract(self._id, self._tags, timeout)
+        result = self._worker_api.contract(self._id, self._tags, timeout_s)
 
         if result.is_err():
             self._logger.error(result.unwrap_err())
@@ -149,7 +150,7 @@ class MECWorker(MECObject):
         if response.job_id is None:
             self._logger.info("No job to contract.")
             return None
-        
+
         self._logger.info(f"Contracted job: {response.job_id}")
 
         return MECJob(
@@ -157,16 +158,16 @@ class MECWorker(MECObject):
             id=response.job_id,
             logger=self._logger,
             httpx_config=self._httpx_config,
-        ).fetch_meta()
+        ).fetch()
 
-    async def contract_async(self, timeout: int = 20) -> Optional[MECJob]:
+    async def contract_async(self, timeout_s: int = 20) -> Optional[MECJob]:
         if not self.has_remote():
             raise Exception()
 
         result = await self._worker_api.contract_async(
             self._id,
             self._tags,
-            timeout,
+            timeout_s,
         )
 
         if result.is_err():
@@ -178,24 +179,24 @@ class MECWorker(MECObject):
         if response.job_id is None:
             self._logger.info("No job to contract.")
             return None
-        
+
         self._logger.info(f"Contracted job: {response.job_id}")
 
         return await MECJob(
             self._server_url,
-            job_id=response.job_id,
+            id=response.job_id,
             logger=self._logger,
             httpx_config=self._httpx_config,
-        ).fetch_meta_async()
+        ).fetch_async()
 
     # wait contract
 
-    def wait_contract(self, timeout: int = 20) -> MECJob:
+    def wait_contract(self) -> MECJob:
         while True:
-            if (job := self.contract(timeout)) is not None:
+            if (job := self.contract()) is not None:
                 return job
 
-    async def wait_contract_async(self, timeout: int = 20) -> MECJob:
+    async def wait_contract_async(self) -> MECJob:
         while True:
-            if (job := await self.contract_async(timeout)) is not None:
+            if (job := await self.contract_async()) is not None:
                 return job

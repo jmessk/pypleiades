@@ -14,10 +14,12 @@ class MECBlobException(Exception):
 
 class MECBlob(MECObject):
     __slots__ = [
+        # super
         "_server_url",
         "_id",
         "_logger",
         "_httpx_config",
+        # self
         "_data_api",
         "_data",
     ]
@@ -55,18 +57,32 @@ class MECBlob(MECObject):
 
         self._data: Optional[bytes] = None
 
-    # properties
+    # check
 
-    @property
-    def data(self) -> Optional[bytes]:
-        """data
+    def has_data(self) -> bool:
+        return self._data is not None
 
-        Getter of _data property.
+    # data
 
-        Returns:
-            bytes: Blob data bytes
+    def get_data(self) -> bytes:
+        # リモートに存在するがデータがない場合は取得する
+        if self.has_remote() and not self.has_data():
+            self.fetch()
 
-        """
+        # リモートにもデータがなくローカルにもデータがない場合は例外を投げる
+        if not self.has_data():
+            raise MECBlobException("No data to get.")
+
+        return self._data
+
+    async def get_data_async(self) -> bytes:
+        # リモートに存在するがデータがない場合は取得する
+        if self.has_remote() and not self.has_data():
+            self.fetch_async()
+
+        # リモートにもデータがなくローカルにもデータがない場合は例外を投げる
+        if not self.has_data():
+            raise MECBlobException("No data to get.")
 
         return self._data
 
@@ -233,7 +249,7 @@ class MECBlob(MECObject):
         if self.has_remote():
             raise MECBlobException("Data already exists on remote server.")
 
-        if self._data is None:
+        if not self.has_data():
             raise MECBlobException("No data to upload.")
 
         result = self._data_api.post_data(self._data)
@@ -251,7 +267,7 @@ class MECBlob(MECObject):
         if self.has_remote():
             raise MECBlobException("Data already exists on remote server.")
 
-        if self._data is None:
+        if not self.has_data():
             raise MECBlobException("No data to upload.")
 
         result = await self._data_api.post_data_async(self._data)
@@ -270,12 +286,9 @@ class MECBlob(MECObject):
     # 自動的にダウンロードするのではなく、明示的にダウンロードするようにする。
     # そのほうがユーザが意図しないタイミングでのダウンロードを防げる。
 
-    def download(self) -> Self:
-        if not self.has_remote():
-            raise MECBlobException("No data to download.")
-
-        if self._data is not None:
-            raise MECBlobException("This object already contains data.")
+    def fetch(self) -> Self:
+        if self.has_data():
+            raise MECBlobException("Data already fetched.")
 
         result = self._data_api.get_data(self._id)
 
@@ -284,16 +297,13 @@ class MECBlob(MECObject):
             raise MECBlobException("Failed to download data.")
 
         self._data = result.unwrap()
-        self._logger.info(f"Downloaded data from {self._id} .")
+        self._logger.info(f"Fetched data from {self._id} .")
 
         return self
 
-    async def download_async(self) -> Self:
-        if not self.has_remote():
-            raise MECBlobException("No data to download.")
-
-        if self._data is not None:
-            raise MECBlobException("This object already contains data.")
+    async def fetch_async(self) -> Self:
+        if self.has_data():
+            raise MECBlobException("Data already fetched.")
 
         result = await self._data_api.get_data_async(self._id)
 
@@ -302,6 +312,6 @@ class MECBlob(MECObject):
             raise MECBlobException("Failed to download data.")
 
         self._data = result.unwrap()
-        self._logger.info(f"Downloaded data from {self._id} .")
+        self._logger.info(f"Fetched data from {self._id} .")
 
         return self

@@ -3,7 +3,12 @@ import logging
 
 
 class MECObject(object):
-    __slots__ = ["_server_url", "_id", "_logger", "_httpx_config"]
+    __slots__ = [
+        "_server_url",
+        "_id",
+        "_logger",
+        "_httpx_config",
+    ]
 
     def __init__(
         self,

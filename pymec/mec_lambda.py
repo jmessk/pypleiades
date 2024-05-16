@@ -46,17 +46,57 @@ class MECLambda(MECObject):
         self._blob: Optional[MECBlob] = None
         self._runtime: Optional[str] = None
 
-    # properties
+    # checker
 
-    @property
-    def blob(self) -> MECBlob:
-        if self._blob.has_remote() and self._blob.data is None:
-            self._blob.download()
+    def has_blob(self) -> bool:
+        return self._blob is not None
+
+    def has_runtime(self) -> bool:
+        return self._runtime is not None
+
+    # blob
+
+    # get
+
+    def get_blob(self) -> MECBlob:
+        if not self.has_blob():
+            raise Exception()
+
         return self._blob
 
-    @property
-    def runtime(self) -> str:
+    async def get_blob_async(self) -> MECBlob:
+        if not self.has_blob():
+            raise Exception()
+
+        return self._blob
+
+    # set
+
+    def set_blob(self, blob: MECBlob) -> Self:
+        if self.has_blob():
+            raise Exception()
+
+        self._blob = blob
+        self._logger.info("Set lambda code.")
+
+        return self
+
+    # runtime
+
+    def get_runtime(self) -> str:
+        if not self.has_runtime():
+            raise Exception()
+
         return self._runtime
+
+    def set_runtime(self, runtime: str) -> Self:
+        if self.has_runtime():
+            raise Exception()
+
+        self._runtime = runtime
+        self._logger.info(f"Set lambda runtime: {self._runtime} .")
+
+        return self
 
     # info
 
@@ -88,44 +128,16 @@ class MECLambda(MECObject):
 
         return result.unwrap()
 
-    # code
-
-    def set_code(self, blob: MECBlob) -> Self:
-        if self.has_remote():
-            raise Exception()
-
-        if self._blob is not None:
-            raise Exception()
-
-        self._blob = blob
-        self._logger.info("Set lambda code.")
-
-        return self
-
-    # runtime
-
-    def set_runtime(self, runtime: str) -> Self:
-        if self.has_remote():
-            raise Exception()
-
-        if self._runtime is not None:
-            raise Exception()
-
-        self._runtime = runtime
-        self._logger.info(f"Set lambda runtime: {self._runtime} .")
-
-        return self
-
     # upload
 
     def upload(self) -> Self:
         if self.has_remote():
             raise Exception()
 
-        if self._blob is None:
+        if not self.has_blob():
             raise Exception()
 
-        if self._runtime is None:
+        if not self.has_runtime():
             raise Exception()
 
         if not self._blob.has_remote():
@@ -149,11 +161,14 @@ class MECLambda(MECObject):
         if self.has_remote():
             raise Exception()
 
-        if self._blob is None:
+        if not self.has_blob():
             raise Exception()
 
-        if self._runtime is None:
+        if not self.has_runtime():
             raise Exception()
+
+        if not self._blob.has_remote():
+            self._blob.upload_async()
 
         result = await self._lambda_api.create_async(
             self._blob.id,
@@ -169,13 +184,14 @@ class MECLambda(MECObject):
 
         return self
 
-    # download
+    # fetch
 
-    def download(self) -> Self:
+    def fetch(self) -> Self:
         if not self.has_remote():
             raise Exception()
 
-        if self._blob is not None:
+        # if self._blob is not None:
+        if self.has_blob():
             raise Exception()
 
         info = self.remote_info()
@@ -185,17 +201,19 @@ class MECLambda(MECObject):
             id=info.data_id,
             logger=self._logger,
             httpx_config=self._httpx_config,
-        ).download()
+        )
+
+        self._runtime = info.runtime
 
         self._logger.info(f"Downloaded lambda from {self._id} .")
 
         return self
 
-    async def download_async(self) -> Self:
+    async def fetch_async(self) -> Self:
         if not self.has_remote():
             raise Exception()
 
-        if self._blob is not None:
+        if self.has_blob():
             raise Exception()
 
         info = await self.remote_info_async()
@@ -205,7 +223,9 @@ class MECLambda(MECObject):
             id=info.data_id,
             logger=self._logger,
             httpx_config=self._httpx_config,
-        ).download_async()
+        )
+
+        self._runtime = info.runtime
 
         self._logger.info(f"Downloaded lambda from {self._id} .")
 

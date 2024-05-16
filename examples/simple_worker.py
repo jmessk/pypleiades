@@ -9,7 +9,7 @@ SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
 def main():
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # Create a client
     client = PleiadesClient(SERVER_URL, logger=logger)
@@ -28,11 +28,10 @@ def main():
 
     # Wait for a job
     job = worker.wait_contract()
-
     # _ = job.lambda_.blob.data
 
     # Process the data
-    input_data = job.input.data.decode("utf-8")
+    input_data = job.get_input().get_data().decode("utf-8")
     output_data = f"{input_data}, World!".encode("utf-8")
 
     # create output blob

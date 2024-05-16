@@ -199,18 +199,23 @@ class JobAPI(MECAPI):
 
     # info
 
-    def info(self, job_id: str, timeout: int = 0) -> Result[RespJobInfo, dict]:
+    def info(
+        self,
+        job_id: str,
+        except_status: Optional[str] = None,
+        timeout_s: int = 0,
+    ) -> Result[RespJobInfo, dict]:
         endpoint = f"{self._server_url}/job/{job_id}"
 
-        if timeout == 0:
+        if timeout_s == 0:
             response = self._client.get(endpoint)
 
         else:
             response = self._client.get(
                 endpoint,
                 params={
-                    "except": "Finished",
-                    "timeout": timeout,
+                    "except": except_status,
+                    "timeout": timeout_s,
                 },
             )
 
@@ -222,10 +227,24 @@ class JobAPI(MECAPI):
 
         return Ok(RespJobInfo(**response_json))
 
-    async def info_async(self, job_id: str) -> Result[RespJobInfo, dict]:
+    async def info_async(
+        self,
+        job_id: str,
+        except_status: Optional[str] = None,
+        timeout_s: int = 0,
+    ) -> Result[RespJobInfo, dict]:
         endpoint = f"{self._server_url}/job/{job_id}"
 
-        response = await self._client_async.get(endpoint)
+        if timeout_s == 0:
+            response = await self._client_async.get(endpoint)
+        else:
+            response = await self._client_async.get(
+                endpoint,
+                params={
+                    "except": except_status,
+                    "timeout": timeout_s,
+                },
+            )
 
         response_json: dict = response.json()
         self._logger.debug(response_json)
