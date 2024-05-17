@@ -24,7 +24,7 @@ def main():
     # Create a input blob
     input_blob = client.new_blob().from_bytes(b"Hello")
 
-    # Create a job by lambda id and input data bytes
+    # Create a job by lambda and input
     job = (
         client.new_job()
         .set_lambda(lambda_)
