@@ -168,7 +168,7 @@ class MECLambda(MECObject):
             raise Exception()
 
         if not self._blob.has_remote():
-            self._blob.upload_async()
+            await self._blob.upload_async()
 
         result = await self._lambda_api.create_async(
             self._blob.id,
