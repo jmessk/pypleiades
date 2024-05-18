@@ -1,11 +1,10 @@
 from attrs import define, field
-import httpx
 import logging
 from result import Result, Ok, Err
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 
-from . import MECAPI
+from .pleiades_api import PleiadesAPI
 from .api_types import Code
 
 
@@ -136,7 +135,7 @@ class RespJobUpdate:
 ###############################################################
 
 
-class JobAPI(MECAPI):
+class JobAPI(PleiadesAPI):
     __slots__ = ["_server_url", "_logger", "_client", "_client_async"]
 
     def __init__(
@@ -168,7 +167,7 @@ class JobAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespJobCreate(**response_json))
@@ -192,7 +191,7 @@ class JobAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespJobCreate(**response_json))
@@ -222,7 +221,7 @@ class JobAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespJobInfo(**response_json))
@@ -249,7 +248,7 @@ class JobAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespJobInfo(**response_json))
@@ -275,7 +274,7 @@ class JobAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespJobUpdate(**response_json))
@@ -299,7 +298,7 @@ class JobAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespJobUpdate(**response_json))

@@ -1,7 +1,7 @@
 import logging
 import asyncio
 
-from pymec.pleiades_client import PleiadesClient
+from pymec import PleiadesClient
 
 
 SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"

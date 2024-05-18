@@ -4,7 +4,7 @@ import io
 from result import Result, Ok, Err
 from typing import Optional
 
-from . import MECAPI
+from .pleiades_api import PleiadesAPI
 from .api_types import Code
 
 
@@ -61,7 +61,7 @@ class RespDataInfo:
 ###############################################################
 
 
-class DataAPI(MECAPI):
+class DataAPI(PleiadesAPI):
     __slots__ = ["_server_url", "_logger", "_client", "_client_async"]
 
     def __init__(
@@ -123,7 +123,7 @@ class DataAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespDataCreate(**response_json))
@@ -141,7 +141,7 @@ class DataAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespDataCreate(**response_json))
@@ -156,7 +156,7 @@ class DataAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespDataInfo(**response_json))
@@ -169,7 +169,7 @@ class DataAPI(MECAPI):
         response_json: dict = response.json()
         self._logger.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespDataInfo(**response_json))

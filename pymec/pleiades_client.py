@@ -5,6 +5,7 @@ from .mec_blob import MECBlob
 from .mec_lambda import MECLambda
 from .mec_job import MECJob
 from .mec_worker import MECWorker
+from .mec_kv import MECKVNamespace
 
 
 class PleiadesClient(object):
@@ -37,5 +38,10 @@ class PleiadesClient(object):
 
     def new_worker(self) -> MECWorker:
         return MECWorker(
+            self._server_url, logger=self._logger, httpx_config=self._httpx_config
+        )
+
+    def new_kv_namespace(self):
+        return MECKVNamespace(
             self._server_url, logger=self._logger, httpx_config=self._httpx_config
         )

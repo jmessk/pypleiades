@@ -1,8 +1,6 @@
 from typing import Optional
 from typing_extensions import Self
 import logging
-import time
-import asyncio
 
 from .api import job_api
 from .mec_object import MECObject

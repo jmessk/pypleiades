@@ -4,7 +4,7 @@ from result import Result, Ok, Err
 from pydantic import BaseModel, Field
 from typing import Optional
 
-from . import MECAPI
+from .pleiades_api import PleiadesAPI
 from .api_types import Code
 
 
@@ -123,7 +123,7 @@ class RespWorkerInfo:
 ###############################################################
 
 
-class WorkerAPI(MECAPI):
+class WorkerAPI(PleiadesAPI):
     __slots__ = ["_server_url", "_logger", "_client", "_client_async"]
 
     def __init__(
@@ -145,7 +145,7 @@ class WorkerAPI(MECAPI):
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespWorkerRegist(**response_json))
@@ -162,7 +162,7 @@ class WorkerAPI(MECAPI):
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespWorkerRegist(**response_json))
@@ -189,9 +189,9 @@ class WorkerAPI(MECAPI):
         logging.debug(response_json)
 
         match response_json.get("code"):
-            case int(Code.OK):
+            case Code.OK.value:
                 return Ok(RespWorkerContract(**response_json))
-            case int(Code.NO_JOB):
+            case Code.NO_JOB.value:
                 return Ok(RespWorkerContract(**response_json))
             case _:
                 return Err(response_json)
@@ -216,9 +216,9 @@ class WorkerAPI(MECAPI):
         logging.debug(response_json)
 
         match response_json.get("code"):
-            case int(Code.OK):
+            case Code.OK.value:
                 return Ok(RespWorkerContract(**response_json))
-            case int(Code.NO_JOB):
+            case Code.NO_JOB.value:
                 return Ok(RespWorkerContract(**response_json))
             case _:
                 return Err(response_json)
@@ -233,7 +233,7 @@ class WorkerAPI(MECAPI):
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespWorkerInfo(**response_json))
@@ -249,7 +249,7 @@ class WorkerAPI(MECAPI):
         response_json: dict[str, str] = response.json()
         logging.debug(response_json)
 
-        if response_json.get("code") != int(Code.OK):
+        if response_json.get("code") != Code.OK.value:
             return Err(response_json)
 
         return Ok(RespWorkerInfo(**response_json))
