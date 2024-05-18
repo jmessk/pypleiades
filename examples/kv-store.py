@@ -7,10 +7,11 @@ SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"
 
 
 def main():
-    logger = get_logger()
+    # logger = get_logger()
 
     # Create a client
-    client = PleiadesClient(SERVER_URL, logger=logger)
+    # client = PleiadesClient(SERVER_URL, logger=logger)
+    client = PleiadesClient(SERVER_URL)
 
     # New namespace instance in local
     namespace = client.new_kv_namespace()
@@ -21,14 +22,18 @@ def main():
     # namespace.set_namespace_id("<namespace_id>")
 
     # New key handler
-    handler = namespace.new_key("pymec-example-key")
+    key_1 = namespace.new_key("pymec-example-key")
 
     # Set value
-    handler.set("Hello, World!")
+    key_1.set("Hello, World!")
 
     # Get value
     for _ in range(3):
-        print(handler.get())
+        print(key_1.get())
+
+    # other key
+    value = namespace.new_key("pymec-example-key-2").set("Other value").get()
+    print(value)
 
 
 def get_logger():
