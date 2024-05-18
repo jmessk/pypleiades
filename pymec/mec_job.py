@@ -208,14 +208,14 @@ class MECJob(MECObject):
 
     # wait finish
 
-    def wait(self, except_status: str, sec: int) -> Self:
+    def wait(self, except_status: str, timeout_s: int) -> Self:
         if not self.has_remote():
             raise Exception()
 
         result_info = self._job_api.info(
             self._id,
             except_status=except_status,
-            timeout_s=sec,
+            timeout_s=timeout_s,
         )
 
         if result_info.is_err():
@@ -238,14 +238,14 @@ class MECJob(MECObject):
 
         return self
 
-    async def wait_async(self, except_status: str, sec: int) -> Self:
+    async def wait_async(self, except_status: str, timeout_s: int) -> Self:
         if not self.has_remote():
             raise Exception()
 
         result_info = await self._job_api.info_async(
             self._id,
             except_status=except_status,
-            timeout_s=sec,
+            timeout_s=timeout_s,
         )
 
         if result_info.is_err():
