@@ -30,7 +30,7 @@ class MECObject(object):
             self._httpx_config = httpx_config
         else:
             self._httpx_config = {
-                "timeout": 30.0,
+                "timeout": None,
             }
 
     @property

@@ -1,5 +1,0 @@
-httpx
-attrs
-result
-pydantic
-aiofiles
