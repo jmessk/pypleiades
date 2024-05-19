@@ -5,6 +5,9 @@ MECRM API を簡単に扱うことができるライブラリです。
 > [!IMPORTANT]
 > v0.5.0 用の実装と互換性がありません
 
+> [!IMPORTANT]
+> Pleiades-core-v0.5.1-snapshot を使用してください
+
 ## Features
 
 unimplemented
