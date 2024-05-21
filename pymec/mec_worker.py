@@ -163,6 +163,8 @@ class MECWorker(MECObject):
     async def contract_async(self, timeout_s: int = 20) -> Optional[MECJob]:
         if not self.has_remote():
             raise Exception()
+        
+        self._logger.info("Contracting job.")
 
         result = await self._worker_api.contract_async(
             self._id,
