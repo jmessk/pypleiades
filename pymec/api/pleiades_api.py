@@ -17,8 +17,16 @@ class PleiadesAPI(object):
         if logger:
             self._logger: logging.Logger = logger
         else:
-            self._logger: logging.Logger = logging.getLogger(__name__)
-            self._logger.setLevel(logging.INFO)
+            logger = logging.getLogger(__name__)
+            handler = logging.StreamHandler(sys.stdout)
+            handler.setLevel(logging.DEBUG)
+            formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            )
+            handler.setFormatter(formatter)
+            logger.setLevel(logging.INFO)
+            logger.addHandler(handler)
+            self._logger = logger
 
         self._client: httpx.Client = httpx.Client(**httpx_config)
         self._client_async: httpx.AsyncClient = httpx.AsyncClient(**httpx_config)
