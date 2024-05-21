@@ -1,6 +1,7 @@
 import httpx
 import logging
 from typing import Optional
+import sys
 
 
 class PleiadesAPI(object):
