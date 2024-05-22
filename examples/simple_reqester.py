@@ -1,4 +1,3 @@
-import logging
 from pymec import PleiadesClient
 
 
@@ -7,12 +6,8 @@ SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-
     # Create a client
-    client = PleiadesClient(SERVER_URL, logger=logger)
+    client = PleiadesClient(SERVER_URL)
 
     # Create a lambda
     lambda_ = (

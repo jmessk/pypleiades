@@ -18,12 +18,12 @@ class PleiadesAPI(object):
         if logger:
             self._logger: logging.Logger = logger
         else:
-            logger = logging.getLogger("pleiades")
+            logger = logging.getLogger("PleiadesAPI")
             if not logger.handlers:
                 handler = logging.StreamHandler()
                 handler.setLevel(logging.DEBUG)
                 formatter = logging.Formatter(
-                        "%(asctime)s - %(module)s::%(funcName)s - [%(levelname)s] - %(message)s"
+                        "%(asctime)s - [%(levelname)s] - %(module)s::%(funcName)s - %(message)s"
                 )
                 handler.setFormatter(formatter)
                 logger.setLevel(logging.DEBUG)

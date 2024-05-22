@@ -1,16 +1,9 @@
-import logging
 import asyncio
 
 from pymec import PleiadesClient
 
 
 SERVER_URL = "https://mecrm.dolylab.cc/api/v0.5-snapshot"
-
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(levelname)s]:[%(module)s::%(funcName)s()]: %(message)s",
-)
 
 
 async def main():

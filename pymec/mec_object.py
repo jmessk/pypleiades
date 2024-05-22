@@ -23,15 +23,15 @@ class MECObject(object):
         if logger:
             self._logger: logging.Logger = logger
         else:
-            logger = logging.getLogger("mecobject")
+            logger = logging.getLogger("MECObject")
             if not logger.handlers:
                 handler = logging.StreamHandler()
                 handler.setLevel(logging.DEBUG)
                 formatter = logging.Formatter(
-                        "%(asctime)s - %(module)s::%(funcName)s - [%(levelname)s] - %(message)s"
+                        "%(asctime)s - [%(levelname)s] - %(module)s::%(funcName)s - %(message)s"
                 )
                 handler.setFormatter(formatter)
-                logger.setLevel(logging.DEBUG)
+                logger.setLevel(logging.INFO)
                 logger.addHandler(handler)
                 logger.propagate = False
             self._logger = logger

@@ -288,7 +288,7 @@ class MECJob(MECObject):
             httpx_config=self._httpx_config,
         )
 
-        self._logger.info("Fetched job: {self._id}")
+        self._logger.info(f"Fetched job: {self._id}")
 
         return self
 
@@ -312,7 +312,7 @@ class MECJob(MECObject):
             httpx_config=self._httpx_config,
         )
 
-        self._logger.info("Fetched job: {self._id}")
+        self._logger.info(f"Fetched job: {self._id}")
 
         return self
 
