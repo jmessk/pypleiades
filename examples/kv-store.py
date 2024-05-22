@@ -1,5 +1,4 @@
 from pymec import PleiadesClient
-import logging
 
 
 # SERVER_URL = "http://192.168.168.127:8332/api/v0.5"
