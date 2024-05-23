@@ -6,7 +6,7 @@ MECRM API を簡単に扱うことができるライブラリです。
 > v0.5.0 用の実装と互換性がありません
 
 > [!IMPORTANT]
-> Pleiades-core-v0.5.1-snapshot を使用してください
+> mecrm-v0.5.1-snapshot を使用してください
 
 ## Features
 
@@ -15,7 +15,7 @@ unimplemented
 ## Installation
 
 ```sh
-git clone https://github.com/CREST-applications/pymec-client.git -b v0.5.1
+git clone https://git.dolylab.cc/mec/pymec-client.git
 cd pymec-client
 pip3 install -e .
 ```

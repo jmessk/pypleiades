@@ -12,8 +12,8 @@ def main():
     # Create a lambda
     lambda_ = (
         client.new_lambda()
-        .set_blob(client.new_blob().from_bytes(b"pymec echo"))
-        .set_runtime("pymec+echo")
+        .set_blob(client.new_blob().from_bytes(b"pymec lambda"))
+        .set_runtime("pymec+helloworld")
     )
 
     # Create a input blob

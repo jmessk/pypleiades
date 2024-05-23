@@ -14,7 +14,7 @@ def main():
         client.new_worker()
         .set_runtimes(
             [
-                "pymec+echo",
+                "pymec+helloworld",
             ]
         )
         .register()
