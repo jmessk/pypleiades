@@ -19,7 +19,7 @@ class Timer:
 
     def finish(self):
         elapsed_time = time.perf_counter() - self.start_time
-        print(f"{self.name} elapsed time: {elapsed_time:.6f} s")
+        print(f"{self.name} elapsed time: {(elapsed_time * 1000):.6f} ms")
 
 
 ###############################################################
@@ -91,10 +91,7 @@ class DataAPI(PleiadesAPI):
     def get_data(self, data_id: str) -> Result[bytes, dict]:
         endpoint = f"{self._server_url}/data/{data_id}/blob"
 
-        start = time.perf_counter()
         response = self._client.get(endpoint)
-        end = time.perf_counter()
-        print(f"get_data: {end - start}")
 
         # If the response is JSON, return the JSON object
         # `response.headers` returns a `CaseInsensitiveDict`
@@ -112,9 +109,9 @@ class DataAPI(PleiadesAPI):
         endpoint = f"{self._server_url}/data/{data_id}/blob"
 
         # timer
-        # start = Timer("\t\tget_data_api")
+        start = Timer("\t\tget_data_api")
         response = await self._client_async.get(endpoint)
-        # start.finish()
+        start.finish()
 
         # If the response is JSON, return the JSON object
         # `response.headers` returns a `CaseInsensitiveDict`

@@ -39,7 +39,7 @@ async def raw(
     lambda_api: api.lambda_api.LambdaAPI,
     job_api: api.job_api.JobAPI,
 ):
-    job_start = Timer("job")
+    # job_start = Timer("job")
 
     # lambda
     # start = Timer("\tpost_data_lib")
@@ -68,7 +68,7 @@ async def raw(
     _ = await data_api.get_data_async(job.unwrap().output.data_id)
     # get_timer.finish()
 
-    job_start.finish()
+    # job_start.finish()
     queue.task_done()
 
 

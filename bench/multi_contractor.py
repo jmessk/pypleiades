@@ -76,7 +76,7 @@ async def worker_spawner(job_queue: asyncio.Queue):
         try:
             job_id = job_queue.get_nowait()
         except Exception:
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.01)
             continue
         print(f"Task {job_id} start")
         task = asyncio.create_task(processor(job_id, task_queue))
