@@ -3,7 +3,6 @@ import logging
 from typing import Optional
 
 
-
 class PleiadesAPI(object):
     __slots__ = ["_server_url", "_logger", "_client", "_client_async"]
 
@@ -23,7 +22,7 @@ class PleiadesAPI(object):
                 handler = logging.StreamHandler()
                 handler.setLevel(logging.DEBUG)
                 formatter = logging.Formatter(
-                        "%(asctime)s - [%(levelname)s] - %(module)s::%(funcName)s - %(message)s"
+                    "%(asctime)s - [%(levelname)s] - %(module)s::%(funcName)s - %(message)s"
                 )
                 handler.setFormatter(formatter)
                 logger.setLevel(logging.DEBUG)
@@ -31,8 +30,15 @@ class PleiadesAPI(object):
                 logger.propagate = False
             self._logger = logger
 
-        self._client: httpx.Client = httpx.Client(**httpx_config)
-        self._client_async: httpx.AsyncClient = httpx.AsyncClient(**httpx_config)
+        if httpx_config:
+            self._client: httpx.Client = httpx.Client(**httpx_config)
+            self._client_async: httpx.AsyncClient = httpx.AsyncClient(**httpx_config)
+        else:
+            httpx_config = {
+                "timeout": None,
+            }
+            self._client: httpx.Client = httpx.Client(**httpx_config)
+            self._client_async: httpx.AsyncClient = httpx.AsyncClient(**httpx_config)
 
 
 # User-Agent: pymec/v0.5.1

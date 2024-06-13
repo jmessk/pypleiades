@@ -7,6 +7,20 @@ from typing import Optional
 from .pleiades_api import PleiadesAPI
 from .api_types import Code
 
+# temp
+import time
+
+
+class Timer:
+    def __init__(self, name):
+        self.name = name
+        print(f"{self.name} start")
+        self.start_time = time.perf_counter()
+
+    def finish(self):
+        elapsed_time = time.perf_counter() - self.start_time
+        print(f"{self.name} elapsed time: {elapsed_time:.6f} s")
+
 
 ###############################################################
 
@@ -77,7 +91,10 @@ class DataAPI(PleiadesAPI):
     def get_data(self, data_id: str) -> Result[bytes, dict]:
         endpoint = f"{self._server_url}/data/{data_id}/blob"
 
+        start = time.perf_counter()
         response = self._client.get(endpoint)
+        end = time.perf_counter()
+        print(f"get_data: {end - start}")
 
         # If the response is JSON, return the JSON object
         # `response.headers` returns a `CaseInsensitiveDict`
@@ -94,7 +111,10 @@ class DataAPI(PleiadesAPI):
     async def get_data_async(self, data_id: str) -> Result[bytes, dict]:
         endpoint = f"{self._server_url}/data/{data_id}/blob"
 
+        # timer
+        # start = Timer("\t\tget_data_api")
         response = await self._client_async.get(endpoint)
+        # start.finish()
 
         # If the response is JSON, return the JSON object
         # `response.headers` returns a `CaseInsensitiveDict`
@@ -118,11 +138,7 @@ class DataAPI(PleiadesAPI):
 
         file = {"file": ("input", io.BytesIO(data_bytes))}
 
-        import time
-        start = time.perf_counter()
         response = self._client.post(endpoint, files=file)
-        end = time.perf_counter()
-        print(f"post_data: {end - start}")
 
         response_json: dict = response.json()
         self._logger.debug(response_json)
@@ -140,7 +156,10 @@ class DataAPI(PleiadesAPI):
 
         file = {"file": ("input", io.BytesIO(data_bytes))}
 
+        # timer
+        # timer = Timer("\t\tpost_data_api")
         response = await self._client_async.post(endpoint, files=file)
+        # timer.finish()
 
         response_json: dict = response.json()
         self._logger.debug(response_json)
