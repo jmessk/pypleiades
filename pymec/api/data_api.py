@@ -118,7 +118,11 @@ class DataAPI(PleiadesAPI):
 
         file = {"file": ("input", io.BytesIO(data_bytes))}
 
+        import time
+        start = time.perf_counter()
         response = self._client.post(endpoint, files=file)
+        end = time.perf_counter()
+        print(f"post_data: {end - start}")
 
         response_json: dict = response.json()
         self._logger.debug(response_json)
