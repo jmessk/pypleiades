@@ -5,22 +5,12 @@
 
 # =============================================================
 
-FROM python:3.10.14
+FROM python:3.12.4
 
 
 # locale
 RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 ENV LANG en_US.UTF-8
-
-# =============================================================
-
-# install packages
-
-
-RUN pip3 install --upgrade pip && \
-    pip3 install \
-    pytest \
-    pytest-asyncio
 
 # =============================================================
 
