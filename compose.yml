@@ -10,3 +10,4 @@ services:
       /bin/bash -c "
       pip3 install -e .
       && /bin/bash"
+
