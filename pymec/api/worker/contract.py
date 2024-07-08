@@ -1,4 +1,4 @@
-from ..api import Request, Response
+from ..api_types import Request, Response
 import httpx
 from typing import override, Optional
 from urllib.parse import urljoin

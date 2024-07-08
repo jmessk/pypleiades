@@ -1,38 +1,66 @@
 import asyncio
 import httpx
 
-from pymec.api import *
+import pymec
+from pymec import api
 
 
 async def main():
-    client = httpx.AsyncClient(timeout=20)
-    # host = "https://mecrm.dolylab.cc/api/v0.5-snapshot/"
-    # host = "http://192.168.168.127:8332/api/v0.5/"
-    host = "http://pleiades.local:8332/api/v0.5/"
+    client = (
+        pymec.Client()
+        .client(httpx.AsyncClient(timeout=10))
+        # .host("https://mecrm.dolylab.cc/api/v0.5-snapshot/")
+        .host("http://192.168.168.127:8332/api/v0.5/")
+        # .host("http://pleiades.local:8332/api/v0.5/")
+    )
 
-    worker_register = await WorkerRegisterRequest(
-        runtimes=["mecrs+bench"],
-    ).send(client, host)
+    # register worker
+    register: api.WorkerRegisterResponse = await client.request(
+        api.WorkerRegisterRequest(runtimes=["test+pymec"])
+    )
 
-    worker_contract = await WorkerContractRequest(
-        worker_id=worker_register.worker_id,
-        tags=[],
-        timeout=10,
-    ).send(client, host)
+    print(register)
 
-    if worker_contract.job_id is None:
+    # contract job
+    contract: api.WorkerContractResponse = await client.request(
+        api.WorkerContractRequest(
+            worker_id=register.worker_id,
+            tags=[],
+            timeout=10,
+        )
+    )
+
+    print(contract)
+
+    if contract.job_id is None:
         print("No job available")
         return
 
-    job_info = await JobInfoRequest(job_id=worker_contract.job_id).send(client, host)
+    # job info
+    job_info: api.JobInfoResponse = await client.request(
+        api.JobInfoRequest(job_id=contract.job_id)
+    )
 
-    output_blob = await DataUploadRequest(b"").send(client, host)
+    print(job_info)
 
-    job_update = await JobUpdateRequest(
-        job_id=worker_contract.job_id,
-        data_id=output_blob.data_id,
-        status="finished",
-    ).send(client, host)
+    # input
+    _: api.DataDownloadResponse = await client.request(
+        api.DataDownloadRequest(data_id=job_info.input.data_id)
+    )
+
+    # output
+    output: api.DataUploadResponse = await client.request(api.DataUploadRequest(data=b""))
+
+    # job update
+    _ = await client.request(
+        api.JobUpdateRequest(
+            job_id=contract.job_id,
+            data_id=output.data_id,
+            status="finished",
+        )
+    )
+
+    print("job finished")
 
 
 if __name__ == "__main__":

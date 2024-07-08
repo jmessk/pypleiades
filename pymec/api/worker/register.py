@@ -1,4 +1,4 @@
-from ..api import Request, Response
+from ..api_types import Request, Response
 import httpx
 from typing import override
 from urllib.parse import urljoin
@@ -30,6 +30,7 @@ class WorkerRegisterRequest(Request):
         host: str,
     ) -> WorkerRegisterResponse:
         url = urljoin(host, self.endpoint())
+        print(self.model_dump())
         response = await client.post(url, json=self.model_dump())
 
         return WorkerRegisterResponse.from_response(response)
