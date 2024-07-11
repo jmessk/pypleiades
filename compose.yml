@@ -1,5 +1,5 @@
 services:
-  worker:
+  dev:
     build: .
     network_mode: host
     tty: true

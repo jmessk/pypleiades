@@ -8,10 +8,11 @@ from pymec import api
 async def main():
     client = (
         pymec.Client()
-        .client(httpx.AsyncClient(timeout=10))
+        .client(httpx.AsyncClient(timeout=20))
         # .host("https://mecrm.dolylab.cc/api/v0.5-snapshot/")
-        .host("http://192.168.168.127:8332/api/v0.5/")
+        # .host("http://192.168.168.127:8332/api/v0.5/")
         # .host("http://pleiades.local:8332/api/v0.5/")
+        .host("http://192.168.1.22/api/v0.5/")
     )
 
     # register worker

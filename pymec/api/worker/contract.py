@@ -31,6 +31,6 @@ class WorkerContractRequest(Request):
         host: str,
     ) -> WorkerContractResponse:
         url = urljoin(host, self.endpoint())
-        response = await client.post(url, json=self.model_dump())
+        response = await client.post(url, json=self.model_dump(by_alias=True))
 
         return WorkerContractResponse.from_response(response)

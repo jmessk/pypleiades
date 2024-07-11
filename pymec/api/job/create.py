@@ -27,6 +27,6 @@ class JobCreateRequest(Request):
     @override
     async def send(self, client: httpx.AsyncClient, host: str) -> JobCreateResponse:
         url = urljoin(host, self.endpoint())
-        response = await client.post(url, json=self.model_dump())
+        response = await client.post(url, json=self.model_dump(by_alias=True))
 
         return JobCreateResponse.from_response(response)

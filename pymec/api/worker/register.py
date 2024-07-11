@@ -9,7 +9,6 @@ class WorkerRegisterResponse(Response):
     code: int
     status: str
     worker_id: str = Field(alias="id")
-    runtimes: list[str] = Field(alias="runtime")
 
     @override
     def from_response(response: httpx.Response):
@@ -30,7 +29,5 @@ class WorkerRegisterRequest(Request):
         host: str,
     ) -> WorkerRegisterResponse:
         url = urljoin(host, self.endpoint())
-        print(self.model_dump())
-        response = await client.post(url, json=self.model_dump())
-
+        response = await client.post(url, json=self.model_dump(by_alias=True))
         return WorkerRegisterResponse.from_response(response)
