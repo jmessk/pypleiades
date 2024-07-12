@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, fine_packages
 
 setup(
     name="pymec",
@@ -7,5 +7,5 @@ setup(
     description="Python client for MECRM API",
     install_requires=["httpx", "attrs>=23.2.0", "result", "pydantic", "aiofiles"],
     tests_require=["pytest", "pytest-asyncio"],
-    packages=["pymec"],
+    packages=find_packages(),
 )
