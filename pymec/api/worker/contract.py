@@ -1,6 +1,7 @@
 from ..api_types import Request, Response
 import httpx
-from typing import override, Optional
+from overrides import override
+from typing import Optional
 from urllib.parse import urljoin
 from pydantic import Field
 

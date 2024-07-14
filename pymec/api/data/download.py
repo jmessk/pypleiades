@@ -1,6 +1,6 @@
 from ..api_types import Request, Response
 import httpx
-from typing import override
+from overrides import override
 from urllib.parse import urljoin
 
 
