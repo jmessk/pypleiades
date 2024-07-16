@@ -12,7 +12,7 @@ class DataDownloadResponse(Response):
         return DataDownloadResponse(data=response.content)
 
 
-class DataDownloadRequest(Request):
+class DataDownloadRequest(Request[DataDownloadResponse]):
     data_id: str
 
     @override

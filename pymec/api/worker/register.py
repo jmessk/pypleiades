@@ -15,7 +15,7 @@ class WorkerRegisterResponse(Response):
         return WorkerRegisterResponse(**response.json())
 
 
-class WorkerRegisterRequest(Request):
+class WorkerRegisterRequest(Request[WorkerRegisterResponse]):
     runtimes: list[str] = Field(serialization_alias="runtime")
 
     @override

@@ -15,7 +15,7 @@ class JobCreateResponse(Response):
         return JobCreateResponse(**response.json())
 
 
-class JobCreateRequest(Request):
+class JobCreateRequest(Request[JobCreateResponse]):
     lambda_id: str = Field(serialization_alias="lambda")
     data_id: str = Field(serialization_alias="input")
     tags: list[str]

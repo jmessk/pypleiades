@@ -1,10 +1,13 @@
 from .api import api_types
 
 from httpx import AsyncClient
-from typing import Optional, Self
+from typing import Optional, Self, TypeVar, Generic
 
 
-class Client:
+R = TypeVar("R", bound=api_types.Response)
+
+
+class Client():
     __slots__ = ["_client", "_host"]
 
     def __init__(self):
@@ -19,5 +22,5 @@ class Client:
         self._host = host
         return self
 
-    async def request(self, request: api_types.Request) -> api_types.Response:
+    async def request(self, request: api_types.Request[R]) -> R:
         return await request.send(self._client, self._host)

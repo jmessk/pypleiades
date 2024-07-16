@@ -10,13 +10,13 @@ async def main():
         pymec.Client()
         .client(httpx.AsyncClient(timeout=20))
         # .host("https://mecrm.dolylab.cc/api/v0.5-snapshot/")
-        # .host("http://192.168.168.127:8332/api/v0.5/")
+        .host("http://192.168.168.127:8332/api/v0.5/")
         # .host("http://pleiades.local:8332/api/v0.5/")
-        .host("http://192.168.1.22/api/v0.5/")
+        # .host("http://192.168.1.22/api/v0.5/")
     )
 
     # create lambda
-    lambda_: api.LambdaCreateResponse = await client.request(
+    lambda_ = await client.request(
         api.LambdaCreateRequest(
             data_id="1",
             runtime="test+pymec",
@@ -26,14 +26,12 @@ async def main():
     print(lambda_)
 
     # input
-    input: api.DataUploadResponse = await client.request(
-        api.DataUploadRequest(data=b"")
-    )
+    input = await client.request(api.DataUploadRequest(data=b""))
 
     print(input)
 
     # job
-    job: api.JobCreateResponse = await client.request(
+    job = await client.request(
         api.JobCreateRequest(
             lambda_id=lambda_.lambda_id,
             data_id=input.data_id,
@@ -44,7 +42,7 @@ async def main():
     print(job)
 
     # wait for finish
-    job_info: api.JobInfoResponse = await client.request(
+    job_info = await client.request(
         api.JobInfoRequest(
             job_id=job.job_id,
             except_="Finished",
@@ -55,9 +53,7 @@ async def main():
     print(job_info)
 
     # output
-    _: api.DataDownloadResponse = await client.request(
-        api.DataDownloadRequest(data_id=job_info.output.data_id)
-    )
+    _ = await client.request(api.DataDownloadRequest(data_id=job_info.output.data_id))
 
     print("job finished")
 

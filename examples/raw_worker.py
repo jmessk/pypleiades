@@ -10,20 +10,18 @@ async def main():
         pymec.Client()
         .client(httpx.AsyncClient(timeout=20))
         # .host("https://mecrm.dolylab.cc/api/v0.5-snapshot/")
-        # .host("http://192.168.168.127:8332/api/v0.5/")
+        .host("http://192.168.168.127:8332/api/v0.5/")
         # .host("http://pleiades.local:8332/api/v0.5/")
-        .host("http://192.168.1.22/api/v0.5/")
+        # .host("http://192.168.1.22/api/v0.5/")
     )
 
     # register worker
-    register: api.WorkerRegisterResponse = await client.request(
-        api.WorkerRegisterRequest(runtimes=["test+pymec"])
-    )
+    register = await client.request(api.WorkerRegisterRequest(runtimes=["test+pymec"]))
 
     print(register)
 
     # contract job
-    contract: api.WorkerContractResponse = await client.request(
+    contract = await client.request(
         api.WorkerContractRequest(
             worker_id=register.worker_id,
             tags=[],
@@ -38,19 +36,15 @@ async def main():
         return
 
     # job info
-    job_info: api.JobInfoResponse = await client.request(
-        api.JobInfoRequest(job_id=contract.job_id)
-    )
+    job_info = await client.request(api.JobInfoRequest(job_id=contract.job_id))
 
     print(job_info)
 
     # input
-    _: api.DataDownloadResponse = await client.request(
-        api.DataDownloadRequest(data_id=job_info.input.data_id)
-    )
+    _ = await client.request(api.DataDownloadRequest(data_id=job_info.input.data_id))
 
     # output
-    output: api.DataUploadResponse = await client.request(api.DataUploadRequest(data=b""))
+    output = await client.request(api.DataUploadRequest(data=b""))
 
     # job update
     _ = await client.request(

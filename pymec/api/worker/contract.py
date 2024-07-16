@@ -15,7 +15,7 @@ class WorkerContractResponse(Response):
         return WorkerContractResponse(**response.json())
 
 
-class WorkerContractRequest(Request):
+class WorkerContractRequest(Request[WorkerContractResponse]):
     worker_id: str = Field(serialization_alias="id")
     tags: list[str]
     timeout: int

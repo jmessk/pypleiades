@@ -15,7 +15,7 @@ class JobUpdateResponse(Response):
         return JobUpdateResponse(**response.json())
 
 
-class JobUpdateRequest(Request):
+class JobUpdateRequest(Request[JobUpdateResponse]):
     job_id: str = Field(exclude=True)
     data_id: str = Field(serialization_alias="output")
     status: str = Field(serialization_alias="status")

@@ -17,7 +17,7 @@ class DataUploadResponse(Response):
         return DataUploadResponse(**response.json())
 
 
-class DataUploadRequest(Request):
+class DataUploadRequest(Request[DataUploadResponse]):
     data: bytes
 
     @override

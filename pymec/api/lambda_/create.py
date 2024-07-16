@@ -15,7 +15,7 @@ class LambdaCreateResponse(Response):
         return LambdaCreateResponse(**response.json())
 
 
-class LambdaCreateRequest(Request):
+class LambdaCreateRequest(Request[LambdaCreateResponse]):
     data_id: str = Field(serialization_alias="codex")
     runtime: str
 

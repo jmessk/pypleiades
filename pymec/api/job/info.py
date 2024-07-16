@@ -33,7 +33,7 @@ class JobInfoResponse(Response):
         return JobInfoResponse(**response.json())
 
 
-class JobInfoRequest(Request):
+class JobInfoRequest(Request[JobInfoResponse]):
     job_id: str
     except_: Optional[str] = Field(serialization_alias="except", default=None)
     timeout: Optional[int] = Field(default=None)
