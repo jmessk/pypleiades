@@ -22,6 +22,7 @@ class LambdaCreateRequest(Request[LambdaCreateResponse]):
 
     async def send(self, client: httpx.AsyncClient, host: str) -> LambdaCreateResponse:
         url = urljoin(host, self.endpoint())
+        print(url)
         response = await client.post(url, json=self.model_dump(by_alias=True))
 
         return LambdaCreateResponse.from_response(response)
