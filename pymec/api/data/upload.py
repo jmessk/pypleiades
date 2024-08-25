@@ -1,6 +1,5 @@
 from ..api_types import Request, Response
 import httpx
-from typing import override
 from urllib.parse import urljoin
 import io
 from pydantic import Field
@@ -12,7 +11,6 @@ class DataUploadResponse(Response):
     data_id: str = Field(alias="id")
     checksum: str
 
-    @override
     def from_response(response: httpx.Response):
         return DataUploadResponse(**response.json())
 
@@ -20,11 +18,9 @@ class DataUploadResponse(Response):
 class DataUploadRequest(Request[DataUploadResponse]):
     data: bytes
 
-    @override
     def endpoint(self):
         return "data"
 
-    @override
     async def send(self, client: httpx.AsyncClient, host: str) -> DataUploadResponse:
         blob = {"file": ("input", io.BytesIO(self.data))}
 

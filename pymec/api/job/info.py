@@ -1,6 +1,6 @@
 from ..api_types import Request, Response
 import httpx
-from typing import override, Optional
+from typing import Optional
 from urllib.parse import urljoin
 from pydantic import Field, BaseModel
 
@@ -28,7 +28,6 @@ class JobInfoResponse(Response):
     input: Input
     output: Optional[Output] = Field(default=None)
 
-    @override
     def from_response(response: httpx.Response):
         return JobInfoResponse(**response.json())
 
@@ -38,11 +37,9 @@ class JobInfoRequest(Request[JobInfoResponse]):
     except_: Optional[str] = Field(serialization_alias="except", default=None)
     timeout: Optional[int] = Field(default=None)
 
-    @override
     def endpoint(self):
         return f"job/{self.job_id}"
 
-    @override
     async def send(self, client: httpx.AsyncClient, host: str) -> JobInfoResponse:
         if self.except_ is None:
             params = {}

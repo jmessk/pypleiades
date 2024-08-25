@@ -1,6 +1,6 @@
 from ..api_types import Request, Response
 import httpx
-from typing import override, Optional
+from typing import Optional
 from urllib.parse import urljoin
 from pydantic import Field
 
@@ -10,7 +10,6 @@ class WorkerContractResponse(Response):
     status: str
     job_id: Optional[str] = Field(alias="job", default=None)
 
-    @override
     def from_response(response: httpx.Response):
         return WorkerContractResponse(**response.json())
 
@@ -20,11 +19,9 @@ class WorkerContractRequest(Request[WorkerContractResponse]):
     tags: list[str]
     timeout: int
 
-    @override
     def endpoint(self):
         return f"worker/{self.worker_id}/contract"
 
-    @override
     async def send(
         self,
         client: httpx.AsyncClient,

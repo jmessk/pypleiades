@@ -1,13 +1,11 @@
 from ..api_types import Request, Response
 import httpx
-from typing import override
 from urllib.parse import urljoin
 
 
 class DataDownloadResponse(Response):
     data: bytes
 
-    @override
     def from_response(response: httpx.Response):
         return DataDownloadResponse(data=response.content)
 
@@ -15,11 +13,9 @@ class DataDownloadResponse(Response):
 class DataDownloadRequest(Request[DataDownloadResponse]):
     data_id: str
 
-    @override
     def endpoint(self):
         return f"data/{self.data_id}/blob"
 
-    @override
     async def send(self, client: httpx.AsyncClient, host: str) -> DataDownloadResponse:
         url = urljoin(host, self.endpoint())
         response = await client.get(url)
