@@ -5,7 +5,7 @@
 
 # =============================================================
 
-FROM python:3.12.4
+FROM python:3.10.14
 
 
 # locale
@@ -19,8 +19,8 @@ ENV LANG en_US.UTF-8
 
 RUN apt-get install -y curl
 
-RUN addgroup --gid 1000 docker && \
-    adduser --uid 1000 --ingroup docker --home /home/docker --shell /bin/bash --disabled-password --gecos "" docker
+RUN addgroup --gid 1001 docker && \
+    adduser --uid 1001 --ingroup docker --home /home/docker --shell /bin/bash --disabled-password --gecos "" docker
 
 RUN USER=docker && \
     GROUP=docker && \

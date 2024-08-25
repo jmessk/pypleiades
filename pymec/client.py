@@ -1,7 +1,7 @@
 from .api import api_types
 
 from httpx import AsyncClient
-from typing import Optional, Self, TypeVar, Generic
+from typing import Optional, TypeVar
 
 
 R = TypeVar("R", bound=api_types.Response)
@@ -14,11 +14,11 @@ class Client():
         self._client: Optional[AsyncClient] = None
         self._host: Optional[str] = None
 
-    def client(self, client: AsyncClient) -> Self:
+    def client(self, client: AsyncClient) -> "Client":
         self._client = client
         return self
 
-    def host(self, host: str) -> Self:
+    def host(self, host: str) -> "Client":
         self._host = host
         return self
 
