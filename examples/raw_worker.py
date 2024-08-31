@@ -1,60 +1,40 @@
 import asyncio
-import httpx
-
 import pymec
-from pymec import api
 
 
 async def main():
     client = (
         pymec.Client()
-        .client(httpx.AsyncClient(timeout=20))
+        .builder()
         # .host("https://mecrm.dolylab.cc/api/v0.5-snapshot/")
         .host("http://192.168.168.127:8332/api/v0.5/")
         # .host("http://pleiades.local:8332/api/v0.5/")
         # .host("http://192.168.1.22/api/v0.5/")
+        .build()
     )
 
     # register worker
-    register = await client.request(api.WorkerRegisterRequest(runtimes=["test+pymec"]))
-
-    print(register)
+    register = await client.api.worker.register(["pymec+example"])
 
     # contract job
-    contract = await client.request(
-        api.WorkerContractRequest(
-            worker_id=register.worker_id,
-            tags=[],
-            timeout=10,
-        )
-    )
-
-    print(contract)
+    contract = await client.api.worker.contract(register.worker_id, 10)
 
     if contract.job_id is None:
         print("No job available")
         return
 
     # job info
-    job_info = await client.request(api.JobInfoRequest(job_id=contract.job_id))
-
-    print(job_info)
+    job_info = await client.api.job.info(contract.job_id)
 
     # input
-    _ = await client.request(api.DataDownloadRequest(data_id=job_info.input.data_id))
+    input = await client.api.data.download(job_info)
+    print(input.data)
 
     # output
-    output = await client.request(api.DataUploadRequest(data=b""))
+    output = await client.api.data.upload(b"example output")
 
     # job update
-    _ = await client.request(
-        api.JobUpdateRequest(
-            job_id=contract.job_id,
-            data_id=output.data_id,
-            status="finished",
-        )
-    )
-
+    _ = await client.api.job.update(contract.job_id, output.data_id, "Finished")
     print("job finished")
 
 

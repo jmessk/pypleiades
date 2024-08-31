@@ -1,23 +1,21 @@
-from ..api_types import Request, Response
+from .. import api
 import httpx
-from urllib.parse import urljoin
 
 
-class DataDownloadResponse(Response):
+class Response(api.Response):
     data: bytes
 
     def from_response(response: httpx.Response):
-        return DataDownloadResponse(data=response.content)
+        return Response(data=response.content)
 
 
-class DataDownloadRequest(Request[DataDownloadResponse]):
+class Request(api.Request[Response]):
     data_id: str
 
     def endpoint(self):
-        return f"data/{self.data_id}/blob"
+        return f"/data/{self.data_id}/blob"
 
-    async def send(self, client: httpx.AsyncClient, host: str) -> DataDownloadResponse:
-        url = urljoin(host, self.endpoint())
-        response = await client.get(url)
+    async def send(self, client: httpx.AsyncClient) -> Response:
+        response = await client.get(self.endpoint())
 
-        return DataDownloadResponse.from_response(response)
+        return Response.from_response(response)

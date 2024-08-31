@@ -1,19 +1,18 @@
-from ..api_types import Request, Response
+from .. import api
 import httpx
-from urllib.parse import urljoin
 from pydantic import Field
 
 
-class JobUpdateResponse(Response):
+class Response(api.Response):
     code: int
     status: str
     message: str
 
     def from_response(response: httpx.Response):
-        return JobUpdateResponse(**response.json())
+        return Response(**response.json())
 
 
-class JobUpdateRequest(Request[JobUpdateResponse]):
+class Request(api.Request[Response]):
     job_id: str = Field(exclude=True)
     data_id: str = Field(serialization_alias="output")
     status: str = Field(serialization_alias="status")
@@ -21,8 +20,7 @@ class JobUpdateRequest(Request[JobUpdateResponse]):
     def endpoint(self):
         return f"job/{self.job_id}"
 
-    async def send(self, client: httpx.AsyncClient, host: str) -> JobUpdateResponse:
-        url = urljoin(host, self.endpoint())
-        response = await client.post(url, json=self.model_dump(by_alias=True))
+    async def send(self, client: httpx.AsyncClient) -> Response:
+        response = await client.post(self.endpoint(), json=self.model_dump(by_alias=True))
 
-        return JobUpdateResponse.from_response(response)
+        return Response.from_response(response)

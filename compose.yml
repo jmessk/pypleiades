@@ -7,6 +7,4 @@ services:
       - .:/pymec
     working_dir: /pymec
     command: >
-      /bin/bash -c "
-      pip3 install -e .
-      && /bin/bash"
+      /bin/bash

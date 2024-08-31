@@ -1,59 +1,32 @@
 import asyncio
-import httpx
-
 import pymec
-from pymec import api
 
 
 async def main():
     client = (
         pymec.Client()
-        .client(httpx.AsyncClient(timeout=20))
+        .builder()
         # .host("https://mecrm.dolylab.cc/api/v0.5-snapshot/")
         .host("http://192.168.168.127:8332/api/v0.5/")
         # .host("http://pleiades.local:8332/api/v0.5/")
         # .host("http://192.168.1.22/api/v0.5/")
+        .build()
     )
 
     # create lambda
-    lambda_ = await client.request(
-        api.LambdaCreateRequest(
-            data_id="1",
-            runtime="test+pymec",
-        )
-    )
-
-    print(lambda_)
+    lambda_ = await client.api.lambda_.create("0", "pymec+example")
 
     # input
-    input = await client.request(api.DataUploadRequest(data=b""))
-
-    print(input)
+    input = await client.api.data.upload(b"example input")
 
     # job
-    job = await client.request(
-        api.JobCreateRequest(
-            lambda_id=lambda_.lambda_id,
-            data_id=input.data_id,
-            tags=[],
-        )
-    )
-
-    print(job)
+    job = await client.api.job.create(lambda_.lambda_id, input.data_id)
 
     # wait for finish
-    job_info = await client.request(
-        api.JobInfoRequest(
-            job_id=job.job_id,
-            except_="Finished",
-            timeout=10,
-        )
-    )
-
-    print(job_info)
+    job_info = await client.api.job.info(job.job_id, except_="Finished", timeout=10)
 
     # output
-    _ = await client.request(api.DataDownloadRequest(data_id=job_info.output.data_id))
+    _ = await client.api.data.download(job_info.output.data_id)
 
     print("job finished")
 

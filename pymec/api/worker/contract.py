@@ -1,20 +1,19 @@
-from ..api_types import Request, Response
+from .. import api
 import httpx
 from typing import Optional
-from urllib.parse import urljoin
 from pydantic import Field
 
 
-class WorkerContractResponse(Response):
+class Response(api.Response):
     code: int
     status: str
     job_id: Optional[str] = Field(alias="job", default=None)
 
     def from_response(response: httpx.Response):
-        return WorkerContractResponse(**response.json())
+        return Response(**response.json())
 
 
-class WorkerContractRequest(Request[WorkerContractResponse]):
+class Request(api.Request[Response]):
     worker_id: str = Field(serialization_alias="id")
     tags: list[str]
     timeout: int
@@ -22,12 +21,10 @@ class WorkerContractRequest(Request[WorkerContractResponse]):
     def endpoint(self):
         return f"worker/{self.worker_id}/contract"
 
-    async def send(
-        self,
-        client: httpx.AsyncClient,
-        host: str,
-    ) -> WorkerContractResponse:
-        url = urljoin(host, self.endpoint())
-        response = await client.post(url, json=self.model_dump(by_alias=True))
+    async def send(self, client: httpx.AsyncClient) -> Response:
+        response = await client.post(
+            self.endpoint(),
+            json=self.model_dump(by_alias=True),
+        )
 
-        return WorkerContractResponse.from_response(response)
+        return Response.from_response(response)

@@ -1,7 +1,6 @@
-from ..api_types import Request, Response
+from .. import api
 import httpx
 from typing import Optional
-from urllib.parse import urljoin
 from pydantic import Field, BaseModel
 
 
@@ -19,7 +18,7 @@ class Output(BaseModel):
     data_id: str = Field(alias="id")
 
 
-class JobInfoResponse(Response):
+class Response(api.Response):
     code: int
     status: str
     job_id: str = Field(alias="id")
@@ -29,10 +28,10 @@ class JobInfoResponse(Response):
     output: Optional[Output] = Field(default=None)
 
     def from_response(response: httpx.Response):
-        return JobInfoResponse(**response.json())
+        return Response(**response.json())
 
 
-class JobInfoRequest(Request[JobInfoResponse]):
+class Request(api.Request[Response]):
     job_id: str
     except_: Optional[str] = Field(serialization_alias="except", default=None)
     timeout: Optional[int] = Field(default=None)
@@ -40,13 +39,12 @@ class JobInfoRequest(Request[JobInfoResponse]):
     def endpoint(self):
         return f"job/{self.job_id}"
 
-    async def send(self, client: httpx.AsyncClient, host: str) -> JobInfoResponse:
+    async def send(self, client: httpx.AsyncClient) -> Response:
         if self.except_ is None:
             params = {}
         else:
             params = {"except": self.except_, "timeout": self.timeout}
 
-        url = urljoin(host, self.endpoint())
-        response = await client.get(url, params=params)
+        response = await client.get(self.endpoint(), params=params)
 
-        return JobInfoResponse.from_response(response)
+        return Response.from_response(response)
