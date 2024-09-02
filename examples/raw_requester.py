@@ -1,20 +1,26 @@
 import asyncio
-import pymec
+import logging
+from pymec import ClientBuilder, api
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 async def main():
     client = (
-        pymec.Client()
-        .builder()
+        ClientBuilder()
         # .host("https://mecrm.dolylab.cc/api/v0.5-snapshot/")
-        .host("http://192.168.168.127:8332/api/v0.5/")
+        # .host("http://192.168.168.127:8332/api/v0.5/")
         # .host("http://pleiades.local:8332/api/v0.5/")
         # .host("http://192.168.1.22/api/v0.5/")
+        .host("http://master.local/api/v0.5/")
         .build()
     )
 
     # create lambda
-    lambda_ = await client.api.lambda_.create("0", "pymec+example")
+    lambda_ = await client.request(
+        api.lambda_.Create(data_id="0", runtime="pymec+example")
+    )
 
     # input
     input = await client.api.data.upload(b"example input")
