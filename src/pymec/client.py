@@ -46,7 +46,6 @@ class ClientBuilder:
 
 class Client:
     __slots__ = ["__client", "_api"]
-    # __slots__ = ["__client"]
 
     def __init__(self, client: AsyncClient):
         self.__client = client
@@ -55,6 +54,10 @@ class Client:
     @property
     def api(self) -> Api:
         return self._api
+    
+    @staticmethod
+    def builder() -> ClientBuilder:
+        return ClientBuilder()
 
-    async def request(self, request: type.Request[R]) -> R:
+    async def call_api(self, request: type.Request[R]) -> R:
         return await request.send(self.__client)

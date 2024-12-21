@@ -16,7 +16,7 @@ class Response(type.Response):
 
 class Request(type.Request[Response]):
     lambda_id: str = Field(serialization_alias="lambda")
-    data_id: str = Field(serialization_alias="input")
+    input_id: str = Field(serialization_alias="input")
     tags: list[str]
 
     def endpoint(self):

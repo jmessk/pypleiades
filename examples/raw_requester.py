@@ -1,38 +1,50 @@
 import asyncio
 import logging
-from pymec import ClientBuilder, api
+from pymec import Client, api
 
 
 logging.basicConfig(level=logging.INFO)
 
 
 async def main():
-    client = (
-        ClientBuilder()
-        # .host("https://mecrm.dolylab.cc/api/v0.5-snapshot/")
-        # .host("http://192.168.168.127:8332/api/v0.5/")
-        # .host("http://pleiades.local:8332/api/v0.5/")
-        # .host("http://192.168.1.22/api/v0.5/")
-        .host("http://master.local/api/v0.5/")
-        .build()
-    )
+    client = Client.builder().host("http://master.local/api/v0.5/").build()
+
+    script_data = b"""
+        print('Hello, World!')
+    """
+
+    # upload user-defined script as blob
+    script = await client.call_api(api.data.Upload(data=script_data))
 
     # create lambda
-    lambda_ = await client.request(
-        api.lambda_.Create(data_id="0", runtime="pymec+example")
+    lambda_ = await client.call_api(
+        api.lambda_.Create(data_id=script.data_id, runtime="pymec+example")
     )
 
     # input
-    input = await client.api.data.upload(b"example input")
+    input = await client.call_api(api.data.Upload(data=b"example input"))
 
     # job
-    job = await client.api.job.create(lambda_.lambda_id, input.data_id)
+    job = await client.call_api(
+        api.job.Create(
+            lambda_id=lambda_.lambda_id,
+            input_id=input.data_id,
+            tags=[],
+        )
+    )
 
     # wait for finish
-    job_info = await client.api.job.info(job.job_id, except_="Finished", timeout=10)
+    job_info = await client.call_api(
+        api.job.Info(
+            job_id=job.job_id,
+            except_="Finished",
+            timeout=10,
+        )
+    )
 
     # output
-    _ = await client.api.data.download(job_info.output.data_id)
+    output = await client.call_api(api.data.Download(data_id=job_info.output.data_id))
+    print(output.data)
 
     print("job finished")
 

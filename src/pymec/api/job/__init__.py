@@ -21,7 +21,7 @@ class Job:
     ) -> create.Response:
         return await create.Request(
             lambda_id=lambda_id,
-            data_id=input_id,
+            input_id=input_id,
             tags=tags,
         ).send(self._client)
 

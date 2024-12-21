@@ -1,1 +1,1 @@
-from .client import ClientBuilder
+from .client import Client
