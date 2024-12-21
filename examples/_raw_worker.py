@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 async def main():
-    client = Client.builder().host("http://master.local/api/v0.5/").build()
+    client = Client.builder().host("http://pleiades.local/api/v0.5/").build()
 
     # register worker
     register = await client.api.worker.register(runtimes=["pymec+example"])
