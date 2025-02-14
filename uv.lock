@@ -8,7 +8,7 @@ resolution-markers = [
 [manifest]
 members = [
     "examples",
-    "pymec",
+    "pleiades",
 ]
 
 [[package]]
@@ -106,6 +106,23 @@ wheels = [
 ]
 
 [[package]]
+name = "pleiades"
+version = "0.3.0"
+source = { editable = "." }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27.2" },
+    { name = "pydantic", specifier = ">=2.8.2" },
+    { name = "python-dotenv", specifier = ">=1.0.1" },
+]
+
+[[package]]
 name = "pydantic"
 version = "2.8.2"
 source = { registry = "https://pypi.org/simple" }
@@ -184,23 +201,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ac/76/450d9258c58dc7c70b9e3aadf6bebe23ddd99e459c365e2adbde80e238da/pydantic_core-2.20.1-pp310-pypy310_pp73-musllinux_1_1_aarch64.whl", hash = "sha256:38cf1c40a921d05c5edc61a785c0ddb4bed67827069f535d794ce6bcded919fc", size = 1960125 },
     { url = "https://files.pythonhosted.org/packages/dd/9e/0309a7a4bea51771729515e413b3987be0789837de99087f7415e0db1f9b/pydantic_core-2.20.1-pp310-pypy310_pp73-musllinux_1_1_x86_64.whl", hash = "sha256:e0bbdd76ce9aa5d4209d65f2b27fc6e5ef1312ae6c5333c26db3f5ade53a1e99", size = 2100407 },
     { url = "https://files.pythonhosted.org/packages/af/93/06d44e08277b3b818b75bd5f25e879d7693e4b7dd3505fde89916fcc9ca2/pydantic_core-2.20.1-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:254ec27fdb5b1ee60684f91683be95e5133c994cc54e86a0b0963afa25c8f8a6", size = 1914966 },
-]
-
-[[package]]
-name = "pymec"
-version = "0.3.0"
-source = { editable = "." }
-dependencies = [
-    { name = "httpx" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.27.2" },
-    { name = "pydantic", specifier = ">=2.8.2" },
-    { name = "python-dotenv", specifier = ">=1.0.1" },
 ]
 
 [[package]]

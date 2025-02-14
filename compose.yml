@@ -1,10 +1,11 @@
 services:
   dev:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.dev
     tty: true
-    volumes:
-      - .:/pleiades-dev
     environment:
       - PLEIADES_URL=https://pleiades.cloud/api/v0.5
+    volumes:
+      - .:/pleiades-dev
+    working_dir: /pleiades-dev
