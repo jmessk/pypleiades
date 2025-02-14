@@ -3,6 +3,6 @@ stages:
 
 ruff:
   stage: lint
-  image: ghcr.io/astral-sh/ruff/ruff:latest
+  image: registry.gitlab.com/pipeline-components/ruff:latest
   script:
     - ruff check --output-format=gitlab .
