@@ -1,5 +1,4 @@
-from .api import type
-from .api import Api
+from .api import Api, ping, type
 
 from httpx import AsyncClient
 from typing import Optional, TypeVar
@@ -61,3 +60,6 @@ class Client:
 
     async def call_api(self, request: type.Request[R]) -> R:
         return await request.send(self.__client)
+    
+    async def ping(self) -> ping.Response:
+        return await self.call_api(ping.Request())
