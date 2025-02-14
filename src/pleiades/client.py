@@ -44,22 +44,32 @@ class ClientBuilder:
 
 
 class Client:
-    __slots__ = ["__client", "_api"]
+    __slots__ = ["__client", "__api"]
 
     def __init__(self, client: AsyncClient):
         self.__client = client
-        self._api = Api(self.__client)
+        self.__api = Api(self.__client)
 
-    @property
-    def api(self) -> Api:
-        return self._api
-    
+    @staticmethod
+    def default() -> "Client":
+        import os
+
+        url = os.environ.get("PLEIADES_URL")
+        if url is None:
+            raise ValueError("PLEIADES_URL is not set")
+
+        return ClientBuilder().host(url).build()
+
     @staticmethod
     def builder() -> ClientBuilder:
         return ClientBuilder()
 
+    @property
+    def api(self) -> Api:
+        return self.__api
+
     async def call_api(self, request: type.Request[R]) -> R:
         return await request.send(self.__client)
-    
+
     async def ping(self) -> ping.Response:
         return await self.call_api(ping.Request())

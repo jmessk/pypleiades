@@ -1,10 +1,13 @@
 import asyncio
-from pymec import Client
+import dotenv
+from pleiades import Client
+
+
+dotenv.load_dotenv(override=True)
 
 
 async def main():
-    client = Client.builder().host("https://mecrm.dolylab.cc/api/v0.5/").build()
-
+    client = Client.default()
     print(await client.ping())
 
 

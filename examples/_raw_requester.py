@@ -1,17 +1,20 @@
 import asyncio
 import logging
-from pymec import Client, api
+import dotenv
+from pleiades import Client, api
 
 
 logging.basicConfig(level=logging.INFO)
+dotenv.load_dotenv(override=True)
 
 
 async def main():
-    client = Client.builder().host("http://pleiades.local/api/v0.5/").build()
+    # client = Client.builder().host("https://mecrm.dolylab.cc/api/v0.5/").build()
+    client = Client.default()
 
     # create lambda
     lambda_ = await client.call_api(
-        api.lambda_.Create(data_id="1", runtime="pymec+example")
+        api.lambda_.Create(data_id="1", runtime="pleiades+example")
     )
 
     # input

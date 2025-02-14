@@ -1,16 +1,19 @@
 import asyncio
 import logging
-from pymec import Client, api
+import dotenv
+from pleiades import Client
 
 
 logging.basicConfig(level=logging.INFO)
+dotenv.load_dotenv(override=True)
 
 
 async def main():
-    client = Client.builder().host("http://pleiades.local/api/v0.5/").build()
+    # client = Client.builder().host("https://mecrm.dolylab.cc/api/v0.5/").build()
+    client = Client.default()
 
     # register worker
-    register = await client.api.worker.register(runtimes=["pymec+example"])
+    register = await client.api.worker.register(runtimes=["pleiades+example"])
 
     # contract job
     contract = await client.api.worker.contract(register.worker_id, timeout=10)
