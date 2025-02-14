@@ -1,0 +1,8 @@
+stages:
+  - lint
+
+ruff:
+  stage: lint
+  image: ghcr.io/astral-sh/ruff/ruff:latest
+  script:
+    - ruff check --output-format=gitlab .
