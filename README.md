@@ -1,4 +1,4 @@
-# Pymec
+# pypleiades
 
 A Pleiades Client for Python.
 
