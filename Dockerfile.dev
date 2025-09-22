@@ -1,3 +1,14 @@
-FROM ghcr.io/astral-sh/uv:python3.10-bookworm
+ARG PYTHON_VERSION=3.10
 
-CMD [ "/bin/bash" ]
+FROM astral/uv:python${PYTHON_VERSION}-bookworm
+
+ARG UID
+ARG GID
+
+RUN groupadd user --gid ${GID} && \
+    useradd user --uid ${UID} --gid ${GID} --shell /bin/bash --create-home
+
+USER user
+WORKDIR /home/user
+
+ENTRYPOINT [ "/bin/bash" ]

@@ -1,7 +1,8 @@
-from .api import Api, ping, type
-
+import os
 from httpx import AsyncClient
 from typing import Optional, TypeVar
+
+from .api import Api, ping, type
 
 
 R = TypeVar("R", bound=type.Response)
@@ -52,8 +53,6 @@ class Client:
 
     @staticmethod
     def default() -> "Client":
-        import os
-
         url = os.environ.get("PLEIADES_URL")
         if url is None:
             raise ValueError("PLEIADES_URL is not set")

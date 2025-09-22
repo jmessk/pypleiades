@@ -3,7 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        - UID=1000
+        - GID=1000
     tty: true
     volumes:
-      - .:/pleiades-dev
-    working_dir: /pleiades-dev
+      - .:/home/user/pypleiades
+    working_dir: /home/user/pypleiades
