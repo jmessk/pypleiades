@@ -17,7 +17,8 @@ class Response(type.Response):
 class Request(type.Request[Response]):
     lambda_id: str = Field(serialization_alias="lambda")
     input_id: str = Field(serialization_alias="input")
-    tags: list[str]
+    tags: list[str] | None = Field(default=None)
+    group_ids: list[str] | None = Field(default=None)
 
     def endpoint(self):
         return "job"

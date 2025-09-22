@@ -19,10 +19,12 @@ class Worker:
         self,
         worker_id: str,
         timeout: int,
-        tags: list[str] = [],
+        tags: list[str] | None = None,
+        group_ids: list[str] | None = None,
     ) -> contract.Response:
         return await contract.Request(
             worker_id=worker_id,
             tags=tags,
+            group_ids=group_ids,
             timeout=timeout,
         ).send(self._client)

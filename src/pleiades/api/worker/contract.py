@@ -17,7 +17,8 @@ class Response(type.Response):
 
 class Request(type.Request[Response]):
     worker_id: str = Field(serialization_alias="id")
-    tags: list[str] = Field(default=[])
+    tags: list[str] | None = Field(default=None)
+    group_ids: list[str] | None = Field(default=None)
     timeout: int
 
     def endpoint(self):

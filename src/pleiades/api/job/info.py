@@ -28,6 +28,8 @@ class Response(type.Response):
     lambda_: Lambda = Field(alias="lambda")
     input: Input
     output: Optional[Output] = Field(default=None)
+    tags: list[str] | None = Field(default=[])
+    group_ids: list[str] | None = Field(default=[])
 
     def from_response(response: httpx.Response) -> "Response":
         return Response(**response.json())

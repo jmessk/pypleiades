@@ -17,12 +17,14 @@ class Job:
         self,
         lambda_id: str,
         input_id: str,
-        tags: list[str] = [],
+        tags: list[str] | None = None,
+        group_ids: list[str] | None = None,
     ) -> create.Response:
         return await create.Request(
             lambda_id=lambda_id,
             input_id=input_id,
             tags=tags,
+            group_ids=group_ids,
         ).send(self._client)
 
     async def info(
