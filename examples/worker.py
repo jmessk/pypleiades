@@ -13,10 +13,15 @@ async def main():
     client = Client.default()
 
     # register worker
-    register = await client.api.worker.register(runtimes=["pleiades+example"])
+    register = await client.api.worker.register(["pleiades+example"])
 
     # contract job
-    contract = await client.api.worker.contract(register.worker_id, timeout=10)
+    contract = await client.api.worker.contract(
+        register.worker_id,
+        timeout=10,
+        tags=["tag-1"],
+        group_ids=["gid-1"],
+    )
 
     if contract.job_id is None:
         print("No job available")
@@ -24,6 +29,7 @@ async def main():
 
     # job info
     job_info = await client.api.job.info(contract.job_id)
+    print(f"Job info: {job_info}")
 
     # user-defined script
     _script = await client.api.data.download(job_info.lambda_.data_id)
